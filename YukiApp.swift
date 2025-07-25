@@ -13,7 +13,7 @@ struct YukiAppApp: App {
                 } else if authVM.role == "artist" {
                     DashboardView().environmentObject(authVM)
                 } else if authVM.role == "user" {
-                    LocationSelectionView().environmentObject(authVM)
+                    MainTabView().environmentObject(authVM)
                 } else {
                     ProgressView()
                 }
