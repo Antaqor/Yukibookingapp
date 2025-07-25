@@ -4,6 +4,16 @@ import SwiftUI
 struct ArtistDashboardView: View {
     @EnvironmentObject private var authVM: AuthViewModel
     @StateObject private var bookingVM = BookingViewModel()
+    @StateObject private var artistVM = ArtistViewModel()
+
+    /// Name of the location this artist is assigned to.
+    private var locationName: String {
+        guard
+            let id = artistVM.artists.first(where: { $0.id == authVM.user?.uid })?.locationId,
+            let location = locations.first(where: { $0.id == id })
+        else { return "" }
+        return location.name
+    }
 
     private func formattedDate(_ timestamp: TimeInterval) -> String {
         let date = Date(timeIntervalSince1970: timestamp)
@@ -28,6 +38,12 @@ struct ArtistDashboardView: View {
     var body: some View {
         NavigationView {
             List {
+                if !locationName.isEmpty {
+                    Section {
+                        Text("Location: \(locationName)")
+                            .font(.headline)
+                    }
+                }
                 ForEach(bookingVM.bookings) { booking in
                     VStack(alignment: .leading, spacing: 8) {
                         Text("User: \(booking.userId)")
@@ -65,6 +81,7 @@ struct ArtistDashboardView: View {
                 Button("Sign Out") { authVM.signOut() }
             }
             .task {
+                await artistVM.fetchArtists()
                 await bookingVM.fetchBookings(artistId: authVM.user?.uid)
             }
         }

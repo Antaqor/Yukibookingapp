@@ -49,7 +49,8 @@ struct ArtistSelectionView: View {
             .padding(.horizontal, 16)
             .sheet(isPresented: $showBooking) {
                 if let artist = selectedArtist {
-                    TimeSelectionView(selectedArtist: artist.id)
+                    // Show only the next three days when booking
+                    TimeSelectionView(selectedArtist: artist.id, daysToShow: 3)
                 }
             }
             .task { await viewModel.fetchArtists() }

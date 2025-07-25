@@ -22,7 +22,7 @@ struct YukiAppApp: App {
                 } else if authVM.role == "admin" {
                     AdminTabView().environmentObject(authVM)
                 } else if authVM.role == "artist" {
-                    ArtistDashboardView().environmentObject(authVM)
+                    ArtistTabView().environmentObject(authVM)
                 } else if authVM.role == "user" {
                     MainTabView().environmentObject(authVM)
                 } else {
