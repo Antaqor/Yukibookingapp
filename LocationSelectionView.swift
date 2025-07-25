@@ -52,7 +52,7 @@ struct LocationSelectionView: View {
             NavigationLink(
                 destination: Group {
                     if let location = selectedLocation {
-                        BranchArtistsView(location: location)
+                        ArtistSelectionView(selectedLocation: location)
                     }
                 },
                 isActive: $isChoosingArtist
