@@ -2,20 +2,54 @@ import SwiftUI
 
 struct ProfileView: View {
     @EnvironmentObject private var authVM: AuthViewModel
+    @StateObject private var bookingVM = BookingViewModel()
+    @StateObject private var artistVM = ArtistViewModel()
+
+    private func artistName(for id: String) -> String {
+        artistVM.artists.first(where: { $0.id == id })?.name ?? id
+    }
 
     var body: some View {
-        VStack(spacing: 16) {
-            if let email = authVM.user?.email {
-                Text(email)
-                    .font(.headline)
+        VStack {
+            List {
+                if let email = authVM.user?.email {
+                    Section {
+                        Text(email)
+                            .font(.headline)
+                    }
+                }
+
+            Section(header: Text("Миний цагууд")) {
+                ForEach(bookingVM.bookings) { booking in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Artist: \(artistName(for: booking.artistId))")
+                        Text("Time: \(booking.time)")
+                        Text("Status: \(booking.status)")
+                    }
+                }
             }
-            Button("Sign Out") {
-                authVM.signOut()
+
+            Section {
+                Button("Sign Out") {
+                    authVM.signOut()
+                }
             }
-            .padding()
-            Spacer()
+            }
+            .listStyle(InsetGroupedListStyle())
+
+            if let error = bookingVM.error {
+                Text(error)
+                    .foregroundColor(.red)
+            }
         }
         .navigationTitle("Profile")
+        .task {
+            await artistVM.fetchArtists()
+            await bookingVM.fetchBookings(userId: authVM.user?.uid)
+        }
+        .refreshable {
+            await bookingVM.fetchBookings(userId: authVM.user?.uid)
+        }
     }
 }
 

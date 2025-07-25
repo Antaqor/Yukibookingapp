@@ -14,7 +14,12 @@ struct ArtistSelectionView: View {
                     .font(.system(size: 22, weight: .bold))
                     .padding(.top, 32)
 
-                ForEach(viewModel.artists) { artist in
+                ForEach(viewModel.artists.filter { artist in
+                    if let location = selectedLocation {
+                        return artist.locationId == location.id
+                    }
+                    return true
+                }) { artist in
                     Button(action: { selectedArtist = artist }) {
                         HStack {
                             Text(artist.name)

@@ -8,9 +8,9 @@ final class BookingViewModel: ObservableObject {
 
     private let db = Database.database().reference()
 
-    /// Fetch bookings. If `artistId` is provided the list is filtered
-    /// to only include bookings for that artist.
-    func fetchBookings(artistId: String? = nil) async {
+    /// Fetch bookings. If `artistId` or `userId` is provided the list is
+    /// filtered accordingly.
+    func fetchBookings(artistId: String? = nil, userId: String? = nil) async {
         error = nil
         do {
             let ref = db.child("bookings")
@@ -19,6 +19,11 @@ final class BookingViewModel: ObservableObject {
                 snapshot = try await ref
                     .queryOrdered(byChild: "artistId")
                     .queryEqual(toValue: artistId)
+                    .getData()
+            } else if let userId {
+                snapshot = try await ref
+                    .queryOrdered(byChild: "userId")
+                    .queryEqual(toValue: userId)
                     .getData()
             } else {
                 snapshot = try await ref.getData()

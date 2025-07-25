@@ -17,7 +17,8 @@ final class ArtistViewModel: ObservableObject {
             for child in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
                 if let value = child.value as? [String: Any] {
                     let name = value["name"] as? String ?? ""
-                    loaded.append(Artist(id: child.key, name: name))
+                    let locationId = value["locationId"] as? Int
+                    loaded.append(Artist(id: child.key, name: name, locationId: locationId))
                 }
             }
             artists = loaded
@@ -49,7 +50,10 @@ final class ArtistViewModel: ObservableObject {
                    emailValue.lowercased() == email.lowercased() {
                     let name = data["name"] as? String ?? ""
                     try await db.child("users").child(userSnap.key).child("role").setValue("artist")
-                    try await db.child("artists").child(userSnap.key).setValue(["name": name])
+                    try await db.child("artists").child(userSnap.key).setValue([
+                        "name": name,
+                        "locationId": NSNull()
+                    ])
                     await fetchArtists()
                     return
                 }
@@ -74,6 +78,21 @@ final class ArtistViewModel: ObservableObject {
         } catch {
             if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
                 self.error = "Unable to remove artist. Check your internet connection."
+            } else {
+                self.error = error.localizedDescription
+            }
+        }
+    }
+
+    /// Assigns an artist to a specific location/branch.
+    func assignArtist(_ artistId: String, to locationId: Int) async {
+        error = nil
+        do {
+            try await db.child("artists").child(artistId).child("locationId").setValue(locationId)
+            await fetchArtists()
+        } catch {
+            if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
+                self.error = "Unable to assign artist. Check your internet connection."
             } else {
                 self.error = error.localizedDescription
             }

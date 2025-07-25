@@ -6,4 +6,6 @@ struct Artist: Identifiable {
     let id: String
     /// Display name of the artist
     let name: String
+    /// Identifier of the branch/location the artist is assigned to
+    let locationId: Int?
 }

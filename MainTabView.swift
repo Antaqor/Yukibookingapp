@@ -1,8 +1,12 @@
 import SwiftUI
 
+/// Main tab bar shown to regular users.
+/// Uses ``TabRouter`` so child views can programmatically switch tabs.
 struct MainTabView: View {
+    @StateObject private var router = TabRouter()
+
     var body: some View {
-        TabView {
+        TabView(selection: $router.selection) {
             NavigationView {
                 LocationSelectionView()
             }
@@ -10,6 +14,7 @@ struct MainTabView: View {
                 Image(systemName: "house")
                 Text("Home")
             }
+            .tag(0)
 
             NavigationView {
                 ProfileView()
@@ -18,7 +23,10 @@ struct MainTabView: View {
                 Image(systemName: "person")
                 Text("Profile")
             }
+            .tag(1)
         }
+        // Provide router to all tab child views
+        .environmentObject(router)
     }
 }
 
