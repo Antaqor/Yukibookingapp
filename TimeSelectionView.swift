@@ -6,7 +6,7 @@ struct TimeSlot: Identifiable {
 }
 
 struct TimeSelectionView: View {
-    var selectedArtist: Int
+    var selectedArtist: String
     @State private var selectedSlot: Int?
     @StateObject private var viewModel = TimeSelectionViewModel()
 
