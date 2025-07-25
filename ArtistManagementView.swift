@@ -5,6 +5,10 @@ struct ArtistManagementView: View {
     @StateObject private var viewModel = ArtistViewModel()
     @State private var email = ""
 
+    private func locationName(for id: Int) -> String {
+        locations.first(where: { $0.id == id })?.name ?? String(id)
+    }
+
     var body: some View {
         VStack {
             List {
@@ -14,12 +18,21 @@ struct ArtistManagementView: View {
                             VStack(alignment: .leading) {
                                 Text(artist.name)
                                 if let location = artist.locationId {
-                                    Text("Location: \(location)")
+                                    Text("Location: \(locationName(for: location))")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
                             }
                             Spacer()
+                            Menu {
+                                ForEach(locations) { location in
+                                    Button(location.name) {
+                                        Task { await viewModel.assignArtist(artist.id, to: location.id) }
+                                    }
+                                }
+                            } label: {
+                                Image(systemName: "mappin.and.ellipse")
+                            }
                             Button(role: .destructive) {
                                 Task { await viewModel.removeArtist(artist) }
                             } label: {

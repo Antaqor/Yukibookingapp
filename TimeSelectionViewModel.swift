@@ -59,7 +59,8 @@ final class TimeSelectionViewModel: ObservableObject {
             "userId": uid,
             "artistId": artistId,
             "time": String(format: "%02d:00", slot),
-            "status": "pending"
+            "status": "pending",
+            "createdAt": Date().timeIntervalSince1970
         ]
         do {
             let ref = db.child("bookings").childByAutoId()

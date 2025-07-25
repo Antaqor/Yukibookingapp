@@ -5,6 +5,14 @@ struct ProfileView: View {
     @StateObject private var bookingVM = BookingViewModel()
     @StateObject private var artistVM = ArtistViewModel()
 
+    private func formattedDate(_ timestamp: TimeInterval) -> String {
+        let date = Date(timeIntervalSince1970: timestamp)
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+
     private func artistName(for id: String) -> String {
         artistVM.artists.first(where: { $0.id == id })?.name ?? id
     }
@@ -24,6 +32,7 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Artist: \(artistName(for: booking.artistId))")
                         Text("Time: \(booking.time)")
+                        Text("Booked: \(formattedDate(booking.createdAt))")
                         Text("Status: \(booking.status)")
                     }
                 }

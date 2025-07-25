@@ -5,6 +5,14 @@ struct DashboardView: View {
     @EnvironmentObject private var authVM: AuthViewModel
     @StateObject private var bookingVM = BookingViewModel()
 
+    private func formattedDate(_ timestamp: TimeInterval) -> String {
+        let date = Date(timeIntervalSince1970: timestamp)
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+
     var body: some View {
         NavigationView {
             List {
@@ -12,6 +20,7 @@ struct DashboardView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("User: \(booking.userId)")
                         Text("Time: \(booking.time)")
+                        Text("Booked: \(formattedDate(booking.createdAt))")
                         Text("Status: \(booking.status)")
                         HStack {
                             Button("Accept") {
