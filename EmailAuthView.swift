@@ -8,47 +8,46 @@ struct EmailAuthView: View {
     @State private var name = ""
     @State private var phone = ""
 
+    // ``Form`` ensures the keyboard's accessory view is handled correctly
+    // and prevents Auto Layout warnings on iPad/Mac Catalyst.
     var body: some View {
-        VStack(spacing: 16) {
-            TextField("Name", text: $name)
-                .textFieldStyle(.roundedBorder)
-
-            TextField("Phone", text: $phone)
-                .keyboardType(.phonePad)
-                .textFieldStyle(.roundedBorder)
-
-            TextField("Email", text: $email)
-                .keyboardType(.emailAddress)
-                .autocapitalization(.none)
-                .textFieldStyle(.roundedBorder)
-
-            SecureField("Password (min 6 chars)", text: $password)
-                .textFieldStyle(.roundedBorder)
-
-            SecureField("Confirm Password", text: $confirmPassword)
-                .textFieldStyle(.roundedBorder)
+        Form {
+            Section {
+                TextField("Name", text: $name)
+                TextField("Phone", text: $phone)
+                    .keyboardType(.phonePad)
+                TextField("Email", text: $email)
+                    .keyboardType(.emailAddress)
+                    .autocapitalization(.none)
+                SecureField("Password (min 6 chars)", text: $password)
+                SecureField("Confirm Password", text: $confirmPassword)
+            }
 
             if let error = authVM.error, !error.isEmpty {
-                Text(error)
-                    .foregroundColor(.red)
-            }
-
-            Button("Log In") {
-                Task { await authVM.login(email: email, password: password) }
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(authVM.isLoading)
-
-            Button("Register") {
-                Task {
-                    await authVM.register(name: name, phone: phone, email: email, password: password, confirmPassword: confirmPassword)
+                Section {
+                    Text(error)
+                        .foregroundColor(.red)
                 }
             }
-            .buttonStyle(.bordered)
-            .disabled(authVM.isLoading)
 
-            if authVM.isLoading { ProgressView() }
+            Section {
+                Button("Log In") {
+                    Task { await authVM.login(email: email, password: password) }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(authVM.isLoading)
+
+                Button("Register") {
+                    Task {
+                        await authVM.register(name: name, phone: phone, email: email, password: password, confirmPassword: confirmPassword)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(authVM.isLoading)
+
+                if authVM.isLoading { ProgressView() }
+            }
         }
-        .padding()
+        .padding(.vertical)
     }
 }
