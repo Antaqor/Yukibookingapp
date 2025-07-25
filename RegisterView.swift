@@ -9,7 +9,7 @@ struct RegisterView: View {
     @State private var phone = ""
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             TextField("Name", text: $name)
                 .textFieldStyle(.roundedBorder)
 
@@ -19,13 +19,16 @@ struct RegisterView: View {
 
             TextField("Email", text: $email)
                 .keyboardType(.emailAddress)
+                .textContentType(.emailAddress)
                 .autocapitalization(.none)
                 .textFieldStyle(.roundedBorder)
 
             SecureField("Password (min 6 chars)", text: $password)
+                .textContentType(.newPassword)
                 .textFieldStyle(.roundedBorder)
 
             SecureField("Confirm Password", text: $confirmPassword)
+                .textContentType(.newPassword)
                 .textFieldStyle(.roundedBorder)
 
             if let error = authVM.error, !error.isEmpty {
@@ -33,12 +36,16 @@ struct RegisterView: View {
                     .foregroundColor(.red)
             }
 
-            Button("Register") {
+            Button(action: {
                 Task {
                     await authVM.register(name: name, phone: phone, email: email, password: password, confirmPassword: confirmPassword)
                 }
+            }) {
+                Text("Register")
+                    .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .tint(Color("AccentColor"))
             .disabled(authVM.isLoading)
 
             if authVM.isLoading { ProgressView() }

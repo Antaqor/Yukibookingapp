@@ -23,6 +23,8 @@ struct YukiAppApp: App {
                     ProgressView()
                 }
             }
+            .tint(Color("AccentColor"))
         }
+        .accentColor(Color("AccentColor"))
     }
 }

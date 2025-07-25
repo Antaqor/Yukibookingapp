@@ -9,13 +9,15 @@ struct LoginView: View {
     @State private var resetMessage = ""
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             TextField("Email", text: $email)
                 .keyboardType(.emailAddress)
+                .textContentType(.emailAddress)
                 .autocapitalization(.none)
                 .textFieldStyle(.roundedBorder)
 
             SecureField("Password", text: $password)
+                .textContentType(.password)
                 .textFieldStyle(.roundedBorder)
 
             if let error = authVM.error, !error.isEmpty {
@@ -23,31 +25,36 @@ struct LoginView: View {
                     .foregroundColor(.red)
             }
 
-        Button("Log In") {
-            Task { await authVM.login(email: email, password: password) }
-        }
-        .buttonStyle(.borderedProminent)
-        .disabled(authVM.isLoading)
-
-        Button("Forgot Password?") {
-            Task {
-                await authVM.resetPassword(email: email)
-                resetMessage = "If an account exists, a reset email has been sent."
-                showResetAlert = true
+            Button(action: {
+                Task { await authVM.login(email: email, password: password) }
+            }) {
+                Text("Log In")
+                    .frame(maxWidth: .infinity)
             }
-        }
-        .font(.footnote)
-        .padding(.top, -8)
+            .buttonStyle(.borderedProminent)
+            .tint(Color("AccentColor"))
+            .disabled(authVM.isLoading)
 
-        Button("Register") {
-            showRegister = true
-        }
-        .buttonStyle(.bordered)
-        .sheet(isPresented: $showRegister) {
-            RegisterView().environmentObject(authVM)
-        }
+            Button("Forgot Password?") {
+                Task {
+                    await authVM.resetPassword(email: email)
+                    resetMessage = "If an account exists, a reset email has been sent."
+                    showResetAlert = true
+                }
+            }
+            .font(.footnote)
+            .padding(.top, -4)
 
-        if authVM.isLoading { ProgressView() }
+            Button("Register") {
+                showRegister = true
+            }
+            .buttonStyle(.bordered)
+            .tint(Color("AccentColor"))
+            .sheet(isPresented: $showRegister) {
+                RegisterView().environmentObject(authVM)
+            }
+
+            if authVM.isLoading { ProgressView() }
         }
         .padding()
         .alert(resetMessage, isPresented: $showResetAlert) {
