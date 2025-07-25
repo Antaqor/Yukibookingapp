@@ -2,7 +2,7 @@ import Foundation
 
 /// Represents a single booking made by a user.
 struct Booking: Identifiable {
-    /// Unique Firestore document id
+    /// Unique booking identifier from Realtime Database
     let id: String
     /// UID of the user who created the booking
     let userId: String

@@ -1,28 +1,31 @@
 import Foundation
-import FirebaseFirestore
+import FirebaseDatabase
 
 @MainActor
 final class BookingViewModel: ObservableObject {
     @Published var bookings: [Booking] = []
     @Published var error: String?
 
-    private let db = Firestore.firestore()
+    private let db = Database.database().reference()
 
     /// Fetch all bookings for admin dashboard
     func fetchBookings() async {
+        error = nil
         do {
-            let snapshot = try await db.collection("bookings").getDocuments()
-            let docs = snapshot.documents
-            self.bookings = docs.map { doc in
-                let data = doc.data()
-                return Booking(
-                    id: doc.documentID,
-                    userId: data["userId"] as? String ?? "",
-                    artistId: data["artistId"] as? Int ?? 0,
-                    time: data["time"] as? String ?? "",
-                    status: data["status"] as? String ?? "pending"
+            let snapshot = try await db.child("bookings").getData()
+            var loaded: [Booking] = []
+            for child in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
+                guard let value = child.value as? [String: Any] else { continue }
+                let booking = Booking(
+                    id: child.key,
+                    userId: value["userId"] as? String ?? "",
+                    artistId: value["artistId"] as? Int ?? 0,
+                    time: value["time"] as? String ?? "",
+                    status: value["status"] as? String ?? "pending"
                 )
+                loaded.append(booking)
             }
+            self.bookings = loaded
         } catch {
             self.error = error.localizedDescription
         }
@@ -30,8 +33,9 @@ final class BookingViewModel: ObservableObject {
 
     /// Update the status of a booking document
     func updateBooking(_ booking: Booking, to status: String) async {
+        let ref = db.child("bookings").child(booking.id).child("status")
         do {
-            try await db.collection("bookings").document(booking.id).updateData(["status": status])
+            try await ref.setValue(status)
             if let index = bookings.firstIndex(where: { $0.id == booking.id }) {
                 bookings[index].status = status
             }
