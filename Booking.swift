@@ -8,6 +8,8 @@ struct Booking: Identifiable {
     let userId: String
     /// The artist identifier (Firebase UID)
     let artistId: String
+    /// Booking date in yyyy-MM-dd format
+    let date: String
     /// Time in HH:mm format
     let time: String
     /// Timestamp when the booking was created

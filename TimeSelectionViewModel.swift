@@ -15,9 +15,11 @@ final class TimeSelectionViewModel: ObservableObject {
 
     private let db = Database.database().reference()
 
-    /// Fetch all accepted bookings for the provided artist.
-    /// - Parameter artistId: Identifier of the artist to filter bookings.
-    func fetchReservedSlots(for artistId: String) async {
+    /// Fetch all accepted bookings for the provided artist on a given date.
+    /// - Parameters:
+    ///   - artistId: Identifier of the artist to filter bookings.
+    ///   - date: Booking date in yyyy-MM-dd format.
+    func fetchReservedSlots(for artistId: String, date: String) async {
         error = nil
         do {
             let snapshot = try await db.child("bookings")
@@ -28,6 +30,7 @@ final class TimeSelectionViewModel: ObservableObject {
                 guard
                     let data = snap.value as? [String: Any],
                     data["status"] as? String == "accepted",
+                    data["date"] as? String == date,
                     let timeString = data["time"] as? String
                 else { return nil }
                 return Int(timeString.prefix(2))
@@ -47,8 +50,9 @@ final class TimeSelectionViewModel: ObservableObject {
     /// Create a new booking with `pending` status.
     /// - Parameters:
     ///   - artistId: The selected artist identifier.
+    ///   - date: Booking date in yyyy-MM-dd format.
     ///   - slot: Hour value for the booking.
-    func createBooking(for artistId: String, slot: Int) async {
+    func createBooking(for artistId: String, date: String, slot: Int) async {
         guard let uid = Auth.auth().currentUser?.uid else {
             error = "User not logged in"
             return
@@ -58,6 +62,7 @@ final class TimeSelectionViewModel: ObservableObject {
         let data: [String: Any] = [
             "userId": uid,
             "artistId": artistId,
+            "date": date,
             "time": String(format: "%02d:00", slot),
             "status": "pending",
             "createdAt": Date().timeIntervalSince1970
@@ -66,7 +71,7 @@ final class TimeSelectionViewModel: ObservableObject {
             let ref = db.child("bookings").childByAutoId()
             try await ref.setValue(data)
             bookingSuccess = true
-            await fetchReservedSlots(for: artistId)
+            await fetchReservedSlots(for: artistId, date: date)
         } catch {
             // Surface network connectivity issues to the view.
             if let urlError = error as? URLError,

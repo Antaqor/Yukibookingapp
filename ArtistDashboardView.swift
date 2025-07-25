@@ -19,6 +19,7 @@ struct ArtistDashboardView: View {
                 ForEach(bookingVM.bookings) { booking in
                     VStack(alignment: .leading, spacing: 8) {
                         Text("User: \(booking.userId)")
+                        Text("Date: \(booking.date)")
                         Text("Time: \(booking.time)")
                         Text("Booked: \(formattedDate(booking.createdAt))")
                         Text("Status: \(booking.status)")
