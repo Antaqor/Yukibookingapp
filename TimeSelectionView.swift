@@ -9,6 +9,8 @@ struct TimeSelectionView: View {
     var selectedArtist: String
     @State private var selectedSlot: Int?
     @StateObject private var viewModel = TimeSelectionViewModel()
+    @EnvironmentObject private var router: TabRouter
+    @Environment(\.presentationMode) private var presentationMode
 
     let timeSlots: [TimeSlot] = (9...18).map { hour in
         TimeSlot(id: hour, time: String(format: "%02d:00", hour))
@@ -74,6 +76,13 @@ struct TimeSelectionView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.fetchReservedSlots(for: selectedArtist)
+        }
+        // When booking succeeds dismiss sheet and switch to profile tab
+        .onChange(of: viewModel.bookingSuccess) { success in
+            if success {
+                presentationMode.wrappedValue.dismiss()
+                router.selection = 1
+            }
         }
     }
 }

@@ -11,7 +11,14 @@ struct ArtistManagementView: View {
                 Section(header: Text("Artists")) {
                     ForEach(viewModel.artists) { artist in
                         HStack {
-                            Text(artist.name)
+                            VStack(alignment: .leading) {
+                                Text(artist.name)
+                                if let location = artist.locationId {
+                                    Text("Location: \(location)")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
                             Spacer()
                             Button(role: .destructive) {
                                 Task { await viewModel.removeArtist(artist) }
