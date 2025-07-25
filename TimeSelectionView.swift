@@ -10,8 +10,7 @@ struct TimeSlot: Identifiable {
 struct TimeSelectionView: View {
     var selectedArtist: Int
     @State private var selectedSlot: Int?
-    @State private var showConfirmation = false
-    @State private var errorMessage: String?
+    @StateObject private var viewModel = TimeSelectionViewModel()
 
     let timeSlots: [TimeSlot] = (9...18).map { hour in
         TimeSlot(id: hour, time: String(format: "%02d:00", hour))
@@ -26,16 +25,20 @@ struct TimeSelectionView: View {
 
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)], spacing: 16) {
                 ForEach(timeSlots) { slot in
+                    let isReserved = viewModel.reservedSlots.contains(slot.id)
                     Button(action: { selectedSlot = slot.id }) {
                         Text(slot.time)
                             .fontWeight(selectedSlot == slot.id ? .bold : .regular)
-                            .foregroundColor(selectedSlot == slot.id ? .white : .primary)
+                            .foregroundColor(isReserved ? .white : (selectedSlot == slot.id ? .white : .primary))
                             .frame(width: 80, height: 40)
-                            .background(selectedSlot == slot.id ? Color.accentColor : Color(.secondarySystemBackground))
+                            .background(
+                                isReserved ? Color.red : (selectedSlot == slot.id ? Color.accentColor : Color(.secondarySystemBackground))
+                            )
                             .cornerRadius(10)
                             .shadow(color: selectedSlot == slot.id ? .gray.opacity(0.5) : .clear, radius: 4, x: 0, y: 2)
                     }
                     .buttonStyle(.plain)
+                    .disabled(isReserved)
                 }
             }
             .padding(.horizontal)
@@ -43,7 +46,9 @@ struct TimeSelectionView: View {
             Spacer()
 
             Button("Баталгаажуулах") {
-                Task { await createBooking() }
+                if let slot = selectedSlot {
+                    Task { await viewModel.createBooking(for: selectedArtist, slot: slot) }
+                }
             }
             .disabled(selectedSlot == nil)
             .frame(maxWidth: .infinity)
@@ -53,12 +58,12 @@ struct TimeSelectionView: View {
             .cornerRadius(10)
             .padding(.horizontal)
 
-            if let errorMessage {
-                Text(errorMessage)
+            if let error = viewModel.error {
+                Text(error)
                     .foregroundColor(.red)
             }
 
-            if showConfirmation {
+            if viewModel.bookingSuccess {
                 Text("Таны цаг амжилттай бүртгэгдлээ")
                     .font(.headline)
                     .foregroundColor(.green)
@@ -67,24 +72,8 @@ struct TimeSelectionView: View {
         }
         .navigationTitle("Цаг авах")
         .navigationBarTitleDisplayMode(.inline)
-    }
-
-    /// Saves the selected booking time to Firestore
-    private func createBooking() async {
-        guard let slot = selectedSlot else { return }
-        errorMessage = nil
-        let uid = Auth.auth().currentUser?.uid ?? ""
-        let data: [String: Any] = [
-            "userId": uid,
-            "artistId": selectedArtist,
-            "time": String(format: "%02d:00", slot),
-            "status": "pending"
-        ]
-        do {
-            _ = try await Firestore.firestore().collection("bookings").addDocument(data: data)
-            showConfirmation = true
-        } catch {
-            errorMessage = error.localizedDescription
+        .task {
+            await viewModel.fetchReservedSlots(for: selectedArtist)
         }
     }
 }

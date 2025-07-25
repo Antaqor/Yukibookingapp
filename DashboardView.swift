@@ -15,12 +15,18 @@ struct DashboardView: View {
                         Text("Status: \(booking.status)")
                         HStack {
                             Button("Accept") {
-                                Task { await bookingVM.updateBooking(booking, to: "accepted") }
+                                Task {
+                                    await bookingVM.updateBooking(booking, to: "accepted")
+                                    await bookingVM.fetchBookings()
+                                }
                             }
                             .disabled(booking.status == "accepted")
 
                             Button("Cancel") {
-                                Task { await bookingVM.updateBooking(booking, to: "canceled") }
+                                Task {
+                                    await bookingVM.updateBooking(booking, to: "canceled")
+                                    await bookingVM.fetchBookings()
+                                }
                             }
                             .tint(.red)
                             .disabled(booking.status == "canceled")
