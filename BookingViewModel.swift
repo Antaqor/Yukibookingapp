@@ -14,9 +14,9 @@ final class BookingViewModel: ObservableObject {
         error = nil
         do {
             let ref = db.child("bookings")
-            // Result from Realtime Database query
-            // `DataSnapshot` represents a single node returned from Firebase.
-            // Ensure the type is spelled correctly to avoid compilation errors.
+            // Result from Realtime Database query. `DataSnapshot` represents
+            // a single node returned from Firebase. Ensure the type name is
+            // spelled correctly to avoid compilation errors.
             let snapshot: DataSnapshot
             if let artistId {
                 snapshot = try await ref
