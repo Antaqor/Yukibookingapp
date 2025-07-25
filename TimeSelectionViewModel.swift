@@ -1,6 +1,6 @@
 import Foundation
 import FirebaseAuth
-import FirebaseFirestore
+import FirebaseDatabase
 
 /// View model responsible for handling booking creation and fetching
 /// reserved time slots for a particular artist.
@@ -13,21 +13,25 @@ final class TimeSelectionViewModel: ObservableObject {
     @Published var bookingSuccess = false
     @Published var isCreating = false
 
-    private let db = Firestore.firestore()
+    private let db = Database.database().reference()
 
     /// Fetch all accepted bookings for the provided artist.
     /// - Parameter artistId: Identifier of the artist to filter bookings.
     func fetchReservedSlots(for artistId: Int) async {
         error = nil
         do {
-            let snapshot = try await db.collection("bookings")
-                .whereField("artistId", isEqualTo: artistId)
-                .whereField("status", isEqualTo: "accepted")
-                .getDocuments()
-            let hours = snapshot.documents.compactMap { doc -> Int? in
-                guard let timeString = doc.data()["time"] as? String else { return nil }
+            let snapshot = try await db.child("bookings")
+                .queryOrdered(byChild: "artistId")
+                .queryEqual(toValue: artistId)
+                .getData()
+            let hours = (snapshot.children.allObjects as? [DataSnapshot])?.compactMap { snap -> Int? in
+                guard
+                    let data = snap.value as? [String: Any],
+                    data["status"] as? String == "accepted",
+                    let timeString = data["time"] as? String
+                else { return nil }
                 return Int(timeString.prefix(2))
-            }
+            } ?? []
             reservedSlots = Set(hours)
         } catch {
             self.error = error.localizedDescription
@@ -52,7 +56,8 @@ final class TimeSelectionViewModel: ObservableObject {
             "status": "pending"
         ]
         do {
-            _ = try await db.collection("bookings").addDocument(data: data)
+            let ref = db.child("bookings").childByAutoId()
+            try await ref.setValue(data)
             bookingSuccess = true
             await fetchReservedSlots(for: artistId)
         } catch {
