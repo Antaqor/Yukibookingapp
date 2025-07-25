@@ -7,13 +7,21 @@ import FirebaseDatabase
 @MainActor
 final class TimeSelectionViewModel: ObservableObject {
     /// Set of booked slots (represented by hour integer) that have
-    /// already been accepted by an admin.
+    /// already been accepted by an admin for a single day.
     @Published var reservedSlots: Set<Int> = []
+    /// Mapping between date string and all reserved hours for that day.
+    @Published var weeklyReserved: [String: Set<Int>] = [:]
     @Published var error: String?
     @Published var bookingSuccess = false
     @Published var isCreating = false
 
     private let db = Database.database().reference()
+    private let calendar = Calendar.current
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
 
     /// Fetch all accepted bookings for the provided artist on a given date.
     /// - Parameters:
@@ -47,6 +55,46 @@ final class TimeSelectionViewModel: ObservableObject {
         }
     }
 
+    /// Fetch bookings for the upcoming week and populate ``weeklyReserved``.
+    /// - Parameter artistId: Identifier of the artist.
+    func fetchWeeklySchedule(for artistId: String) async {
+        error = nil
+        weeklyReserved = [:]
+        do {
+            // Fetch all bookings for the artist in a single query
+            let snapshot = try await db.child("bookings")
+                .queryOrdered(byChild: "artistId")
+                .queryEqual(toValue: artistId)
+                .getData()
+
+            let validDates: [String] = (0..<7).compactMap { offset in
+                guard let date = calendar.date(byAdding: .day, value: offset, to: calendar.startOfDay(for: Date())) else { return nil }
+                return dateFormatter.string(from: date)
+            }
+
+            var schedule: [String: Set<Int>] = [:]
+            for child in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
+                guard
+                    let data = child.value as? [String: Any],
+                    data["status"] as? String == "accepted",
+                    let date = data["date"] as? String,
+                    let time = data["time"] as? String,
+                    let hour = Int(time.prefix(2)),
+                    validDates.contains(date)
+                else { continue }
+                schedule[date, default: []].insert(hour)
+            }
+            weeklyReserved = schedule
+        } catch {
+            if let urlError = error as? URLError,
+               urlError.code == .notConnectedToInternet {
+                self.error = "Unable to fetch slots. Check your internet connection."
+            } else {
+                self.error = error.localizedDescription
+            }
+        }
+    }
+
     /// Create a new booking with `pending` status.
     /// - Parameters:
     ///   - artistId: The selected artist identifier.
@@ -71,7 +119,7 @@ final class TimeSelectionViewModel: ObservableObject {
             let ref = db.child("bookings").childByAutoId()
             try await ref.setValue(data)
             bookingSuccess = true
-            await fetchReservedSlots(for: artistId, date: date)
+            await fetchWeeklySchedule(for: artistId)
         } catch {
             // Surface network connectivity issues to the view.
             if let urlError = error as? URLError,
