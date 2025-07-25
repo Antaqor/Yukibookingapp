@@ -20,43 +20,45 @@ struct LocationSelectionView: View {
     var body: some View {
         VStack(spacing: 24) {
             Text("Салбараа сонгоно уу")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(.system(size: 22, weight: .bold))
                 .padding(.top, 32)
 
-            List {
-                ForEach(locations) { location in
+            ForEach(locations) { location in
+                Button(action: { selectedLocation = location }) {
                     HStack {
                         Text(location.name)
+                            .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(selectedLocation?.id == location.id ? .white : .primary)
                         Spacer()
                         if selectedLocation?.id == location.id {
-                            Image(systemName: "checkmark.circle.fill")
+                            Image(systemName: "checkmark")
                                 .foregroundColor(.white)
                         }
                     }
-                    .padding(.vertical, 8)
+                    .padding()
                     .frame(maxWidth: .infinity)
                     .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(selectedLocation?.id == location.id ? Color.accentColor : Color.gray.opacity(0.2))
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(selectedLocation?.id == location.id ? Color("AccentColor") : Color(.systemGray6))
                     )
-                    .onTapGesture { selectedLocation = location }
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
                 }
+                .buttonStyle(.plain)
             }
-            .listStyle(.plain)
 
             Spacer()
 
-            Button("Үргэлжлүүлэх") {
-                isChoosingArtist = true
+            Button(action: { isChoosingArtist = true }) {
+                Text("Үргэлжлүүлэх")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(maxWidth: .infinity, minHeight: 50)
             }
-            .buttonStyle(.borderedProminent)
+            .background(selectedLocation == nil ? Color(.systemGray4) : Color("AccentColor"))
+            .foregroundColor(.white)
+            .cornerRadius(12)
             .disabled(selectedLocation == nil)
             .padding(.bottom, 24)
         }
+        .padding(.horizontal, 16)
         .sheet(isPresented: $isChoosingArtist) {
             ArtistSelectionView(selectedLocation: selectedLocation)
         }
