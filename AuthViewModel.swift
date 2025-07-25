@@ -16,7 +16,7 @@ final class AuthViewModel: ObservableObject {
 
     /// Maps Firebase errors to user friendly messages
     private func handleAuthError(_ error: Error) {
-        // Convert NSError code into Firebase's AuthErrorCode enumeration
+        // Convert ``NSError`` code into Firebase's ``AuthErrorCode`` enumeration
         if let code = AuthErrorCode(rawValue: (error as NSError).code) {
             switch code {
             case .invalidEmail:
@@ -27,6 +27,14 @@ final class AuthViewModel: ObservableObject {
                 self.error = "Password is too weak"
             case .wrongPassword, .userNotFound:
                 self.error = "Incorrect email or password"
+            case .userDisabled:
+                self.error = "This account has been disabled"
+            case .invalidCredential, .invalidUserToken, .userTokenExpired:
+                self.error = "The supplied credentials have expired. Please log in again"
+            case .networkError:
+                self.error = "Network error. Please check your connection"
+            case .tooManyRequests:
+                self.error = "Too many attempts. Please try again later"
             default:
                 self.error = error.localizedDescription
             }
@@ -107,11 +115,14 @@ final class AuthViewModel: ObservableObject {
         isLoading = false
     }
 
+    /// Signs out the current user and clears local state.
     func signOut() {
         do {
             try Auth.auth().signOut()
+            // Reset published properties so views update correctly
             self.user = nil
             self.role = nil
+            self.error = nil
         } catch {
             handleAuthError(error)
         }
