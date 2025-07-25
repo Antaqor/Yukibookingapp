@@ -18,16 +18,14 @@ struct LocationSelectionView: View {
     ]
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 24) {
             Text("Салбараа сонгоно уу")
-                .font(.title)
-                .fontWeight(.bold)
+                .font(.title2)
+                .fontWeight(.semibold)
                 .padding(.top, 32)
 
-            ForEach(locations) { location in
-                Button(action: {
-                    selectedLocation = location
-                }) {
+            List {
+                ForEach(locations) { location in
                     HStack {
                         Text(location.name)
                             .foregroundColor(selectedLocation?.id == location.id ? .white : .primary)
@@ -37,28 +35,27 @@ struct LocationSelectionView: View {
                                 .foregroundColor(.white)
                         }
                     }
-                    .padding()
+                    .padding(.vertical, 8)
                     .frame(maxWidth: .infinity)
-                    .background(selectedLocation?.id == location.id ? Color.blue : Color.gray.opacity(0.2))
-                    .cornerRadius(10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(selectedLocation?.id == location.id ? Color.accentColor : Color.gray.opacity(0.2))
+                    )
+                    .onTapGesture { selectedLocation = location }
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
                 }
-                .padding(.horizontal)
             }
-
-            if selectedLocation != nil {
-                Button("Үргэлжлүүлэх") {
-                    isChoosingArtist = true
-                }
-                .buttonStyle(.borderedProminent)
-                .padding(.top, 16)
-            }
-
-            Button("Sign Out") {
-                authVM.signOut()
-            }
-            .padding(.top, 32)
+            .listStyle(.plain)
 
             Spacer()
+
+            Button("Үргэлжлүүлэх") {
+                isChoosingArtist = true
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(selectedLocation == nil)
+            .padding(.bottom, 24)
         }
         .sheet(isPresented: $isChoosingArtist) {
             ArtistSelectionView(selectedLocation: selectedLocation)
