@@ -27,7 +27,13 @@ final class BookingViewModel: ObservableObject {
             }
             self.bookings = loaded
         } catch {
-            self.error = error.localizedDescription
+            if let dbError = error as NSError?,
+               dbError.domain == DatabaseErrorDomain,
+               DatabaseErrorCode(rawValue: dbError.code) == .networkError {
+                self.error = "Unable to fetch bookings. Check your internet connection."
+            } else {
+                self.error = error.localizedDescription
+            }
         }
     }
 
@@ -40,7 +46,13 @@ final class BookingViewModel: ObservableObject {
                 bookings[index].status = status
             }
         } catch {
-            self.error = error.localizedDescription
+            if let dbError = error as NSError?,
+               dbError.domain == DatabaseErrorDomain,
+               DatabaseErrorCode(rawValue: dbError.code) == .networkError {
+                self.error = "Unable to update booking. Check your internet connection."
+            } else {
+                self.error = error.localizedDescription
+            }
         }
     }
 }
