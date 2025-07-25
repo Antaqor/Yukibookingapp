@@ -51,7 +51,7 @@ struct TimeSelectionView: View {
             .padding(.horizontal)
 
             if showConfirmation {
-                Text("Таны сонгосон цаг: \(selectedSlot != nil ? timeSlots.first { $0.id == selectedSlot }!.time : "")")
+                Text("Таны цаг амжилттай бүртгэгдлээ")
                     .font(.headline)
                     .foregroundColor(.green)
                     .transition(.slide)
