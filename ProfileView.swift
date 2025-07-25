@@ -17,6 +17,18 @@ struct ProfileView: View {
         artistVM.artists.first(where: { $0.id == id })?.name ?? id
     }
 
+    /// Returns a background color representing booking status.
+    private func statusColor(for status: String) -> Color {
+        switch status {
+        case "accepted":
+            return Color.green.opacity(0.2)
+        case "canceled":
+            return Color.red.opacity(0.2)
+        default:
+            return Color.orange.opacity(0.2)
+        }
+    }
+
     var body: some View {
         VStack {
             List {
@@ -35,7 +47,12 @@ struct ProfileView: View {
                         Text("Time: \(booking.time)")
                         Text("Booked: \(formattedDate(booking.createdAt))")
                         Text("Status: \(booking.status)")
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
                     }
+                    .padding(8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(RoundedRectangle(cornerRadius: 8).fill(statusColor(for: booking.status)))
                 }
             }
 
