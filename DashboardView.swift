@@ -13,6 +13,18 @@ struct DashboardView: View {
         return formatter.string(from: date)
     }
 
+    /// Maps a booking status string to a background color.
+    private func statusColor(for status: String) -> Color {
+        switch status {
+        case "accepted":
+            return Color.green.opacity(0.2)
+        case "canceled":
+            return Color.red.opacity(0.2)
+        default:
+            return Color.orange.opacity(0.2)
+        }
+    }
+
     var body: some View {
         NavigationView {
             List {
@@ -23,6 +35,7 @@ struct DashboardView: View {
                         Text("Time: \(booking.time)")
                         Text("Booked: \(formattedDate(booking.createdAt))")
                         Text("Status: \(booking.status)")
+                            .fontWeight(.semibold)
                         HStack {
                             Button("Accept") {
                                 Task {
@@ -42,7 +55,9 @@ struct DashboardView: View {
                             .disabled(booking.status == "canceled")
                         }
                     }
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 4)
+                    .background(RoundedRectangle(cornerRadius: 8).fill(statusColor(for: booking.status)))
                 }
             }
             .navigationTitle("Dashboard")
