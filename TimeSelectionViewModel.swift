@@ -34,11 +34,9 @@ final class TimeSelectionViewModel: ObservableObject {
             } ?? []
             reservedSlots = Set(hours)
         } catch {
-            // Cast to Firebase's ``DatabaseError`` to check for connectivity
-            // issues and provide a more user friendly message.
-            if let dbError = error as NSError?,
-               dbError.domain == DatabaseErrorDomain,
-               DatabaseErrorCode(rawValue: dbError.code) == .networkError {
+            // Firebase surfaces connectivity issues through ``URLError``.
+            if let urlError = error as? URLError,
+               urlError.code == .notConnectedToInternet {
                 self.error = "Unable to fetch slots. Check your internet connection."
             } else {
                 self.error = error.localizedDescription
@@ -70,9 +68,8 @@ final class TimeSelectionViewModel: ObservableObject {
             await fetchReservedSlots(for: artistId)
         } catch {
             // Surface network connectivity issues to the view.
-            if let dbError = error as NSError?,
-               dbError.domain == DatabaseErrorDomain,
-               DatabaseErrorCode(rawValue: dbError.code) == .networkError {
+            if let urlError = error as? URLError,
+               urlError.code == .notConnectedToInternet {
                 self.error = "Unable to create booking. Check your internet connection."
             } else {
                 self.error = error.localizedDescription

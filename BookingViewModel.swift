@@ -27,9 +27,12 @@ final class BookingViewModel: ObservableObject {
             }
             self.bookings = loaded
         } catch {
-            if let dbError = error as NSError?,
-               dbError.domain == DatabaseErrorDomain,
-               DatabaseErrorCode(rawValue: dbError.code) == .networkError {
+            // Attempt to surface a more friendly message when the
+            // device has no internet connectivity. Firebase currently
+            // reports this as a generic `URLError` from the URL loading
+            // system so we check for it explicitly.
+            if let urlError = error as? URLError,
+               urlError.code == .notConnectedToInternet {
                 self.error = "Unable to fetch bookings. Check your internet connection."
             } else {
                 self.error = error.localizedDescription
@@ -46,9 +49,10 @@ final class BookingViewModel: ObservableObject {
                 bookings[index].status = status
             }
         } catch {
-            if let dbError = error as NSError?,
-               dbError.domain == DatabaseErrorDomain,
-               DatabaseErrorCode(rawValue: dbError.code) == .networkError {
+            // Similar to ``fetchBookings`` we try to detect if the
+            // operation failed due to connectivity issues.
+            if let urlError = error as? URLError,
+               urlError.code == .notConnectedToInternet {
                 self.error = "Unable to update booking. Check your internet connection."
             } else {
                 self.error = error.localizedDescription
