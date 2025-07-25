@@ -14,6 +14,8 @@ final class BookingViewModel: ObservableObject {
         error = nil
         do {
             let ref = db.child("bookings")
+            // Result from Realtime Database query
+            // `DataSnapshot` represents a single node returned from Firebase.
             let snapshot: DataSnapshot
             if let artistId {
                 snapshot = try await ref
@@ -58,7 +60,15 @@ final class BookingViewModel: ObservableObject {
     }
 
     /// Update the status of a booking document
+    /// - Parameters:
+    ///   - booking: The booking to update.
+    ///   - status: New status string. Must not be empty.
     func updateBooking(_ booking: Booking, to status: String) async {
+        guard !status.isEmpty else {
+            error = "Invalid status"
+            return
+        }
+
         let ref = db.child("bookings").child(booking.id).child("status")
         do {
             try await ref.setValue(status)
