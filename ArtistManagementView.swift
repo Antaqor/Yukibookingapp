@@ -10,11 +10,13 @@ struct ArtistManagementView: View {
     }
 
     var body: some View {
-        VStack {
-            List {
-                Section(header: Text("Artists")) {
-                    ForEach(viewModel.artists) { artist in
-                        HStack {
+        // Wrapping content in ``Form`` ensures the keyboard accessory
+        // view is managed correctly and avoids Auto Layout warnings
+        // when the text field becomes first responder on iPad/Mac.
+        Form {
+            Section(header: Text("Artists")) {
+                ForEach(viewModel.artists) { artist in
+                    HStack {
                             VStack(alignment: .leading) {
                                 Text(artist.name)
                                 if let location = artist.locationId {
@@ -46,6 +48,7 @@ struct ArtistManagementView: View {
                     TextField("User email", text: $email)
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
+                        .textContentType(.emailAddress)
                     Button("Add") {
                         Task {
                             await viewModel.addArtist(email: email)
@@ -53,11 +56,11 @@ struct ArtistManagementView: View {
                         }
                     }
                 }
-            }
             if let error = viewModel.error {
-                Text(error)
-                    .foregroundColor(.red)
-                    .padding()
+                Section {
+                    Text(error)
+                        .foregroundColor(.red)
+                }
             }
         }
         .navigationTitle("Artists")
