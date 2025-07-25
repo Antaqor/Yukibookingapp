@@ -16,7 +16,8 @@ final class AuthViewModel: ObservableObject {
 
     /// Maps Firebase errors to user friendly messages
     private func handleAuthError(_ error: Error) {
-        if let code = AuthErrorCode.Code(rawValue: (error as NSError).code) {
+        // Convert NSError code into Firebase's AuthErrorCode enumeration
+        if let code = AuthErrorCode(rawValue: (error as NSError).code) {
             switch code {
             case .invalidEmail:
                 self.error = "Invalid email address"
