@@ -57,6 +57,17 @@ final class AuthViewModel: ObservableObject {
         isLoading = false
     }
 
+    func resetPassword(email: String) async {
+        isLoading = true
+        error = nil
+        do {
+            try await Auth.auth().sendPasswordReset(withEmail: email)
+        } catch {
+            self.error = error.localizedDescription
+        }
+        isLoading = false
+    }
+
     func signOut() {
         do {
             try Auth.auth().signOut()
