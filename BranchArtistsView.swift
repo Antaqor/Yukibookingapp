@@ -26,6 +26,7 @@ struct BranchArtistsView: View {
                 Section(header: Text(artist.name)) {
                     ForEach(bookings(for: artist)) { booking in
                         VStack(alignment: .leading, spacing: 4) {
+                            Text("Date: \(booking.date)")
                             Text("Time: \(booking.time)")
                             Text("Booked: \(formattedDate(booking.createdAt))")
                             Text("Status: \(booking.status)")

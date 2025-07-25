@@ -31,6 +31,7 @@ struct ProfileView: View {
                 ForEach(bookingVM.bookings) { booking in
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Artist: \(artistName(for: booking.artistId))")
+                        Text("Date: \(booking.date)")
                         Text("Time: \(booking.time)")
                         Text("Booked: \(formattedDate(booking.createdAt))")
                         Text("Status: \(booking.status)")

@@ -35,6 +35,7 @@ final class BookingViewModel: ObservableObject {
                     id: child.key,
                     userId: value["userId"] as? String ?? "",
                     artistId: value["artistId"] as? String ?? "",
+                    date: value["date"] as? String ?? "",
                     time: value["time"] as? String ?? "",
                     createdAt: value["createdAt"] as? TimeInterval ?? 0,
                     status: value["status"] as? String ?? "pending"

@@ -8,6 +8,7 @@ struct TimeSlot: Identifiable {
 struct TimeSelectionView: View {
     var selectedArtist: String
     @State private var selectedSlot: Int?
+    @State private var selectedDate: Date = Date()
     @StateObject private var viewModel = TimeSelectionViewModel()
     @EnvironmentObject private var router: TabRouter
     @Environment(\.presentationMode) private var presentationMode
@@ -16,11 +17,41 @@ struct TimeSelectionView: View {
         TimeSlot(id: hour, time: String(format: "%02d:00", hour))
     }
 
+    private let dates: [Date] = (0..<7).compactMap {
+        Calendar.current.date(byAdding: .day, value: $0, to: Date())
+    }
+
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }
+
     var body: some View {
         VStack(spacing: 24) {
             Text("Цаг сонгоно уу")
                 .font(.system(size: 22, weight: .bold))
                 .padding(.top, 32)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(dates, id: \.self) { date in
+                        let isSelected = Calendar.current.isDate(date, inSameDayAs: selectedDate)
+                        Button(action: {
+                            selectedDate = date
+                            Task { await viewModel.fetchReservedSlots(for: selectedArtist, date: dateFormatter.string(from: date)) }
+                        }) {
+                            Text(DateFormatter.localizedString(from: date, dateStyle: .short, timeStyle: .none))
+                                .padding(8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8).fill(isSelected ? Color("AccentColor") : Color(.systemGray6))
+                                )
+                                .foregroundColor(isSelected ? .white : .primary)
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
 
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 16)], spacing: 16) {
                 ForEach(timeSlots) { slot in
@@ -47,7 +78,8 @@ struct TimeSelectionView: View {
 
             Button(action: {
                 if let slot = selectedSlot {
-                    Task { await viewModel.createBooking(for: selectedArtist, slot: slot) }
+                    let dateString = dateFormatter.string(from: selectedDate)
+                    Task { await viewModel.createBooking(for: selectedArtist, date: dateString, slot: slot) }
                 }
             }) {
                 Text("Баталгаажуулах")
@@ -75,7 +107,8 @@ struct TimeSelectionView: View {
         .navigationTitle("Цаг авах")
         .navigationBarTitleDisplayMode(.inline)
         .task {
-            await viewModel.fetchReservedSlots(for: selectedArtist)
+            let dateString = dateFormatter.string(from: selectedDate)
+            await viewModel.fetchReservedSlots(for: selectedArtist, date: dateString)
         }
         // When booking succeeds dismiss sheet and switch to profile tab
         .onChange(of: viewModel.bookingSuccess) { success in
