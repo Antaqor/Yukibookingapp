@@ -8,4 +8,7 @@ struct Artist: Identifiable {
     let name: String
     /// Identifier of the branch/location the artist is assigned to
     let locationId: Int?
+    /// Available booking hours for the artist represented as 24h integers.
+    /// When empty all default hours are available.
+    let availableTimes: [Int]
 }

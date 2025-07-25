@@ -43,7 +43,7 @@ struct BranchArtistsView: View {
         .sheet(isPresented: $showingTimeSelection) {
             if let artist = selectedArtist {
                 // Show only the next 3 days when booking from the admin panel
-                TimeSelectionView(selectedArtist: artist.id, daysToShow: 3)
+                TimeSelectionView(artist: artist, daysToShow: 3)
             }
         }
         .task {
