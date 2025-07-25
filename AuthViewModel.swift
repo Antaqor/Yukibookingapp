@@ -38,14 +38,18 @@ final class AuthViewModel: ObservableObject {
         isLoading = false
     }
 
-    func register(email: String, password: String) async {
+    func register(name: String, phone: String, email: String, password: String, confirmPassword: String) async {
+        guard password == confirmPassword else {
+            self.error = "Passwords do not match"
+            return
+        }
         isLoading = true
         error = nil
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             self.user = result.user
             let ref = Database.database().reference().child("users").child(result.user.uid)
-            try await ref.setValue(["role": "user"])
+            try await ref.setValue(["role": "user", "name": name, "phone": phone])
             await fetchUserRole()
         } catch {
             self.error = error.localizedDescription
