@@ -16,8 +16,8 @@ struct TimeSelectionView: View {
     @EnvironmentObject private var router: TabRouter
     @Environment(\.presentationMode) private var presentationMode
 
-    /// Available booking slots from 9 AM to 11 PM.
-    let timeSlots: [TimeSlot] = (9...23).map { hour in
+    /// Available booking slots from 9 AM to 6 PM.
+    let timeSlots: [TimeSlot] = (9...18).map { hour in
         TimeSlot(id: hour, time: String(format: "%02d:00", hour))
     }
 
