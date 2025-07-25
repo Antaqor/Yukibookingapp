@@ -1,21 +1,10 @@
 import SwiftUI
 
-struct Location: Identifiable {
-    let id: Int
-    let name: String
-}
-
 struct LocationSelectionView: View {
     @EnvironmentObject private var authVM: AuthViewModel
     @State private var selectedLocation: Location?
     @State private var isChoosingArtist = false
 
-    private let locations = [
-        Location(id: 1, name: "Их дэлгүүрийн баруун талд"),
-        Location(id: 2, name: "Чингис зочид буудал"),
-        Location(id: 3, name: "Санто Апартмент"),
-        Location(id: 4, name: "VIP Center")
-    ]
 
     var body: some View {
         VStack(spacing: 24) {
@@ -59,9 +48,19 @@ struct LocationSelectionView: View {
             .padding(.bottom, 24)
         }
         .padding(.horizontal, 16)
-        .sheet(isPresented: $isChoosingArtist) {
-            ArtistSelectionView(selectedLocation: selectedLocation)
-        }
+        .background(
+            NavigationLink(
+                destination: Group {
+                    if let location = selectedLocation {
+                        BranchArtistsView(location: location)
+                    }
+                },
+                isActive: $isChoosingArtist
+            ) {
+                EmptyView()
+            }
+            .hidden()
+        )
         .navigationTitle("Locations")
         .navigationBarTitleDisplayMode(.inline)
     }

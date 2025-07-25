@@ -36,11 +36,12 @@ final class BookingViewModel: ObservableObject {
                     userId: value["userId"] as? String ?? "",
                     artistId: value["artistId"] as? String ?? "",
                     time: value["time"] as? String ?? "",
+                    createdAt: value["createdAt"] as? TimeInterval ?? 0,
                     status: value["status"] as? String ?? "pending"
                 )
                 loaded.append(booking)
             }
-            self.bookings = loaded
+            self.bookings = loaded.sorted { $0.createdAt > $1.createdAt }
         } catch {
             // Attempt to surface a more friendly message when the
             // device has no internet connectivity. Firebase currently

@@ -10,6 +10,8 @@ struct Booking: Identifiable {
     let artistId: String
     /// Time in HH:mm format
     let time: String
+    /// Timestamp when the booking was created
+    let createdAt: TimeInterval
     /// Current status: pending/accepted/canceled
     var status: String
 }
