@@ -17,44 +17,46 @@ struct TimeSelectionView: View {
     var body: some View {
         VStack(spacing: 24) {
             Text("Цаг сонгоно уу")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(.system(size: 22, weight: .bold))
                 .padding(.top, 32)
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)], spacing: 16) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 16)], spacing: 16) {
                 ForEach(timeSlots) { slot in
                     let isReserved = viewModel.reservedSlots.contains(slot.id)
                     Button(action: { selectedSlot = slot.id }) {
                         Text(slot.time)
-                            .fontWeight(selectedSlot == slot.id ? .bold : .regular)
+                            .font(.system(size: 16, weight: selectedSlot == slot.id ? .bold : .regular))
                             .foregroundColor(isReserved ? .white : (selectedSlot == slot.id ? .white : .primary))
-                            .frame(width: 80, height: 40)
+                            .frame(width: 80, height: 44)
                             .background(
-                                isReserved ? Color.red : (selectedSlot == slot.id ? Color.accentColor : Color(.secondarySystemBackground))
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(
+                                        isReserved ? Color.red : (selectedSlot == slot.id ? Color("AccentColor") : Color(.systemGray6))
+                                    )
                             )
-                            .cornerRadius(10)
-                            .shadow(color: selectedSlot == slot.id ? .gray.opacity(0.5) : .clear, radius: 4, x: 0, y: 2)
                     }
                     .buttonStyle(.plain)
                     .disabled(isReserved)
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 16)
 
             Spacer()
 
-            Button("Баталгаажуулах") {
+            Button(action: {
                 if let slot = selectedSlot {
                     Task { await viewModel.createBooking(for: selectedArtist, slot: slot) }
                 }
+            }) {
+                Text("Баталгаажуулах")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(maxWidth: .infinity, minHeight: 50)
             }
-            .disabled(selectedSlot == nil)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(selectedSlot == nil ? Color.gray.opacity(0.3) : Color.accentColor)
+            .background(selectedSlot == nil ? Color(.systemGray4) : Color("AccentColor"))
             .foregroundColor(.white)
-            .cornerRadius(10)
-            .padding(.horizontal)
+            .cornerRadius(12)
+            .disabled(selectedSlot == nil)
+            .padding(.horizontal, 16)
 
             if let error = viewModel.error {
                 Text(error)

@@ -18,43 +18,54 @@ struct ArtistSelectionView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 16) {
+            VStack(spacing: 24) {
                 Text("Artist-аа сонгоно уу")
-                    .font(.headline)
+                    .font(.system(size: 22, weight: .bold))
+                    .padding(.top, 32)
+
                 ForEach(artists) { artist in
-                    Button(action: {
-                        selectedArtist = artist
-                    }) {
+                    Button(action: { selectedArtist = artist }) {
                         HStack {
                             Text(artist.name)
+                                .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(selectedArtist?.id == artist.id ? .white : .primary)
                             Spacer()
                             if selectedArtist?.id == artist.id {
-                                Image(systemName: "checkmark.circle.fill")
+                                Image(systemName: "checkmark")
                                     .foregroundColor(.white)
                             }
                         }
                         .padding()
-                        .background(selectedArtist?.id == artist.id ? Color.purple : Color.gray.opacity(0.2))
-                        .cornerRadius(10)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(selectedArtist?.id == artist.id ? Color("AccentColor") : Color(.systemGray6))
+                        )
                     }
-                    .padding(.horizontal)
+                    .buttonStyle(.plain)
                 }
-                if selectedArtist != nil {
-                    Button("Цаг авах") {
-                        showBooking = true
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.top)
-                }
+
                 Spacer()
+
+                if selectedArtist != nil {
+                    Button(action: { showBooking = true }) {
+                        Text("Цаг авах")
+                            .font(.system(size: 16, weight: .semibold))
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                    }
+                    .background(Color("AccentColor"))
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
             }
-            .navigationTitle("Artist сонгох")
+            .padding(.horizontal, 16)
             .sheet(isPresented: $showBooking) {
                 if let artist = selectedArtist {
                     TimeSelectionView(selectedArtist: artist.id)
                 }
             }
+            .navigationTitle("Artist сонгох")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }
