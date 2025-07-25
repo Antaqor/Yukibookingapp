@@ -50,7 +50,11 @@ struct ArtistSelectionView: View {
                 Spacer()
             }
             .navigationTitle("Artist сонгох")
-            // Optionally: .sheet(isPresented: $showBooking) { ... }
+            .sheet(isPresented: $showBooking) {
+                if let artist = selectedArtist {
+                    TimeSelectionView(selectedArtist: artist.id)
+                }
+            }
         }
     }
 }
