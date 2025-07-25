@@ -1,4 +1,6 @@
 import SwiftUI
+import FirebaseAuth
+import FirebaseFirestore
 
 struct TimeSlot: Identifiable {
     let id: Int
@@ -9,6 +11,7 @@ struct TimeSelectionView: View {
     var selectedArtist: Int
     @State private var selectedSlot: Int?
     @State private var showConfirmation = false
+    @State private var errorMessage: String?
 
     let timeSlots: [TimeSlot] = (9...18).map { hour in
         TimeSlot(id: hour, time: String(format: "%02d:00", hour))
@@ -40,7 +43,7 @@ struct TimeSelectionView: View {
             Spacer()
 
             Button("Баталгаажуулах") {
-                showConfirmation = true
+                Task { await createBooking() }
             }
             .disabled(selectedSlot == nil)
             .frame(maxWidth: .infinity)
@@ -49,6 +52,11 @@ struct TimeSelectionView: View {
             .foregroundColor(.white)
             .cornerRadius(10)
             .padding(.horizontal)
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+            }
 
             if showConfirmation {
                 Text("Таны цаг амжилттай бүртгэгдлээ")
@@ -59,5 +67,24 @@ struct TimeSelectionView: View {
         }
         .navigationTitle("Цаг авах")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// Saves the selected booking time to Firestore
+    private func createBooking() async {
+        guard let slot = selectedSlot else { return }
+        errorMessage = nil
+        let uid = Auth.auth().currentUser?.uid ?? ""
+        let data: [String: Any] = [
+            "userId": uid,
+            "artistId": selectedArtist,
+            "time": String(format: "%02d:00", slot),
+            "status": "pending"
+        ]
+        do {
+            _ = try await Firestore.firestore().collection("bookings").addDocument(data: data)
+            showConfirmation = true
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }

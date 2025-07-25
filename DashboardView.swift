@@ -1,16 +1,39 @@
 import SwiftUI
 
+/// Dashboard shown for admin users to manage bookings.
 struct DashboardView: View {
     @EnvironmentObject private var authVM: AuthViewModel
+    @StateObject private var bookingVM = BookingViewModel()
 
     var body: some View {
-        VStack {
-            Text("Artist Dashboard")
-                .font(.title)
-            Button("Sign Out") {
-                authVM.signOut()
+        NavigationView {
+            List {
+                ForEach(bookingVM.bookings) { booking in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("User: \(booking.userId)")
+                        Text("Time: \(booking.time)")
+                        Text("Status: \(booking.status)")
+                        HStack {
+                            Button("Accept") {
+                                Task { await bookingVM.updateBooking(booking, to: "accepted") }
+                            }
+                            .disabled(booking.status == "accepted")
+
+                            Button("Cancel") {
+                                Task { await bookingVM.updateBooking(booking, to: "canceled") }
+                            }
+                            .tint(.red)
+                            .disabled(booking.status == "canceled")
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
             }
-            .padding()
+            .navigationTitle("Dashboard")
+            .toolbar {
+                Button("Sign Out") { authVM.signOut() }
+            }
+            .task { await bookingVM.fetchBookings() }
         }
     }
 }
