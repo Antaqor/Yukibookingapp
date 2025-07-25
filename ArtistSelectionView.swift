@@ -20,7 +20,10 @@ struct ArtistSelectionView: View {
                     }
                     return true
                 }) { artist in
-                    Button(action: { selectedArtist = artist }) {
+                    Button(action: {
+                        selectedArtist = artist
+                        showBooking = true
+                    }) {
                         HStack {
                             Text(artist.name)
                                 .font(.system(size: 16, weight: .semibold))
@@ -42,17 +45,6 @@ struct ArtistSelectionView: View {
                 }
 
                 Spacer()
-
-                if selectedArtist != nil {
-                    Button(action: { showBooking = true }) {
-                        Text("Цаг авах")
-                            .font(.system(size: 16, weight: .semibold))
-                            .frame(maxWidth: .infinity, minHeight: 50)
-                    }
-                    .background(Color("AccentColor"))
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                }
             }
             .padding(.horizontal, 16)
             .sheet(isPresented: $showBooking) {
