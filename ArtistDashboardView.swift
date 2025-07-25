@@ -38,12 +38,8 @@ struct ArtistDashboardView: View {
     var body: some View {
         NavigationView {
             List {
-                if !locationName.isEmpty {
-                    Section {
-                        Text("Location: \(locationName)")
-                            .font(.headline)
-                    }
-                }
+                // Show user's bookings first so artists immediately see their
+                // upcoming schedule when opening the dashboard.
                 ForEach(bookingVM.bookings) { booking in
                     VStack(alignment: .leading, spacing: 8) {
                         Text("User: \(booking.userId)")
@@ -74,6 +70,12 @@ struct ArtistDashboardView: View {
                     .padding(.vertical, 8)
                     .padding(.horizontal, 4)
                     .background(RoundedRectangle(cornerRadius: 8).fill(statusColor(for: booking.status)))
+                }
+                if !locationName.isEmpty {
+                    Section {
+                        Text("Location: \(locationName)")
+                            .font(.headline)
+                    }
                 }
             }
             .navigationTitle("My Bookings")

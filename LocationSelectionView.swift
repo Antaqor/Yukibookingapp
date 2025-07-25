@@ -1,10 +1,11 @@
 import SwiftUI
 
+/// Location selection screen used by regular users.
+///
+/// The next step (artist selection) is now triggered directly by tapping a
+/// location row rather than pressing a separate continue button.
 struct LocationSelectionView: View {
     @EnvironmentObject private var authVM: AuthViewModel
-    @State private var selectedLocation: Location?
-    @State private var isChoosingArtist = false
-
 
     var body: some View {
         VStack(spacing: 24) {
@@ -12,55 +13,31 @@ struct LocationSelectionView: View {
                 .font(.system(size: 22, weight: .bold))
                 .padding(.top, 32)
 
+            // Each location row navigates immediately to artist selection
+            // eliminating the need for a "Үргэлжлүүлэх" button.
             ForEach(locations) { location in
-                Button(action: { selectedLocation = location }) {
+                NavigationLink(destination: ArtistSelectionView(selectedLocation: location)) {
                     HStack {
                         Text(location.name)
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(selectedLocation?.id == location.id ? .white : .primary)
+                            .foregroundColor(.primary)
                         Spacer()
-                        if selectedLocation?.id == location.id {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(.white)
-                        }
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
                     }
                     .padding()
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(selectedLocation?.id == location.id ? Color("AccentColor") : Color(.systemGray6))
+                            .fill(Color(.systemGray6))
                     )
                 }
                 .buttonStyle(.plain)
             }
 
             Spacer()
-
-            Button(action: { isChoosingArtist = true }) {
-                Text("Үргэлжлүүлэх")
-                    .font(.system(size: 16, weight: .semibold))
-                    .frame(maxWidth: .infinity, minHeight: 50)
-            }
-            .background(selectedLocation == nil ? Color(.systemGray4) : Color("AccentColor"))
-            .foregroundColor(.white)
-            .cornerRadius(12)
-            .disabled(selectedLocation == nil)
-            .padding(.bottom, 24)
         }
         .padding(.horizontal, 16)
-        .background(
-            NavigationLink(
-                destination: Group {
-                    if let location = selectedLocation {
-                        ArtistSelectionView(selectedLocation: location)
-                    }
-                },
-                isActive: $isChoosingArtist
-            ) {
-                EmptyView()
-            }
-            .hidden()
-        )
         .navigationTitle("Locations")
         .navigationBarTitleDisplayMode(.inline)
     }
