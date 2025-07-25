@@ -1,5 +1,9 @@
 import SwiftUI
 
+/// Entry point of the application.
+/// Uses the MVVM architecture by injecting the ``AuthViewModel``
+/// into the environment for all child views.
+
 @main
 struct YukiAppApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
@@ -25,6 +29,5 @@ struct YukiAppApp: App {
             }
             .tint(Color("AccentColor"))
         }
-        .accentColor(Color("AccentColor"))
     }
 }
