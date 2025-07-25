@@ -92,7 +92,7 @@ final class AuthViewModel: ObservableObject {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             self.user = result.user
             let ref = Database.database().reference().child("users").child(result.user.uid)
-            try await ref.setValue(["role": "user", "name": name, "phone": phone])
+            try await ref.setValue(["role": "user", "name": name, "phone": phone, "email": email])
             await fetchUserRole()
         } catch {
             handleAuthError(error)

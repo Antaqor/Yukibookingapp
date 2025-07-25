@@ -17,7 +17,7 @@ final class TimeSelectionViewModel: ObservableObject {
 
     /// Fetch all accepted bookings for the provided artist.
     /// - Parameter artistId: Identifier of the artist to filter bookings.
-    func fetchReservedSlots(for artistId: Int) async {
+    func fetchReservedSlots(for artistId: String) async {
         error = nil
         do {
             let snapshot = try await db.child("bookings")
@@ -48,7 +48,7 @@ final class TimeSelectionViewModel: ObservableObject {
     /// - Parameters:
     ///   - artistId: The selected artist identifier.
     ///   - slot: Hour value for the booking.
-    func createBooking(for artistId: Int, slot: Int) async {
+    func createBooking(for artistId: String, slot: Int) async {
         guard let uid = Auth.auth().currentUser?.uid else {
             error = "User not logged in"
             return

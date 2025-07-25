@@ -1,20 +1,11 @@
 import SwiftUI
 
-struct Artist: Identifiable {
-    let id: Int
-    let name: String
-}
 
 struct ArtistSelectionView: View {
     var selectedLocation: Location?
     @State private var selectedArtist: Artist?
     @State private var showBooking = false
-
-    private let artists = [
-        Artist(id: 1, name: "Ари"),
-        Artist(id: 2, name: "Зулаа"),
-        Artist(id: 3, name: "Болормаа")
-    ]
+    @StateObject private var viewModel = ArtistViewModel()
 
     var body: some View {
         NavigationView {
@@ -23,7 +14,7 @@ struct ArtistSelectionView: View {
                     .font(.system(size: 22, weight: .bold))
                     .padding(.top, 32)
 
-                ForEach(artists) { artist in
+                ForEach(viewModel.artists) { artist in
                     Button(action: { selectedArtist = artist }) {
                         HStack {
                             Text(artist.name)
@@ -64,6 +55,7 @@ struct ArtistSelectionView: View {
                     TimeSelectionView(selectedArtist: artist.id)
                 }
             }
+            .task { await viewModel.fetchArtists() }
             .navigationTitle("Artist сонгох")
             .navigationBarTitleDisplayMode(.inline)
         }

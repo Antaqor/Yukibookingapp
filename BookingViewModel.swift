@@ -8,18 +8,28 @@ final class BookingViewModel: ObservableObject {
 
     private let db = Database.database().reference()
 
-    /// Fetch all bookings for admin dashboard
-    func fetchBookings() async {
+    /// Fetch bookings. If `artistId` is provided the list is filtered
+    /// to only include bookings for that artist.
+    func fetchBookings(artistId: String? = nil) async {
         error = nil
         do {
-            let snapshot = try await db.child("bookings").getData()
+            let ref = db.child("bookings")
+            let snapshot: DataSnapshot
+            if let artistId {
+                snapshot = try await ref
+                    .queryOrdered(byChild: "artistId")
+                    .queryEqual(toValue: artistId)
+                    .getData()
+            } else {
+                snapshot = try await ref.getData()
+            }
             var loaded: [Booking] = []
             for child in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
                 guard let value = child.value as? [String: Any] else { continue }
                 let booking = Booking(
                     id: child.key,
                     userId: value["userId"] as? String ?? "",
-                    artistId: value["artistId"] as? Int ?? 0,
+                    artistId: value["artistId"] as? String ?? "",
                     time: value["time"] as? String ?? "",
                     status: value["status"] as? String ?? "pending"
                 )
