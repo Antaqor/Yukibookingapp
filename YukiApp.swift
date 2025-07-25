@@ -4,12 +4,17 @@ import SwiftUI
 struct YukiAppApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject private var authVM = AuthViewModel()
+    @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
 
     var body: some Scene {
         WindowGroup {
             Group {
                 if authVM.user == nil {
-                    EmailAuthView().environmentObject(authVM)
+                    if hasLaunchedBefore {
+                        LoginView().environmentObject(authVM)
+                    } else {
+                        RegisterView().environmentObject(authVM)
+                    }
                 } else if authVM.role == "artist" {
                     DashboardView().environmentObject(authVM)
                 } else if authVM.role == "user" {
