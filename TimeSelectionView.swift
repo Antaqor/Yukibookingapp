@@ -6,7 +6,10 @@ struct TimeSlot: Identifiable {
 }
 
 struct TimeSelectionView: View {
+    /// Identifier of the artist the user wants to book.
     var selectedArtist: String
+    /// Number of days ahead to display for booking. Defaults to one week.
+    var daysToShow: Int = 7
     @State private var selectedSlot: Int?
     @State private var selectedDateString: String?
     @StateObject private var viewModel = TimeSelectionViewModel()
@@ -17,8 +20,12 @@ struct TimeSelectionView: View {
         TimeSlot(id: hour, time: String(format: "%02d:00", hour))
     }
 
-    private let dates: [Date] = (0..<7).compactMap {
-        Calendar.current.date(byAdding: .day, value: $0, to: Date())
+    /// All selectable dates computed based on ``daysToShow``.
+    private var dates: [Date] {
+        let maxDays = max(1, daysToShow)
+        return (0..<maxDays).compactMap {
+            Calendar.current.date(byAdding: .day, value: $0, to: Date())
+        }
     }
 
     private var dateFormatter: DateFormatter {
@@ -106,7 +113,7 @@ struct TimeSelectionView: View {
         .navigationTitle("Цаг авах")
         .navigationBarTitleDisplayMode(.inline)
         .task {
-            await viewModel.fetchWeeklySchedule(for: selectedArtist)
+            await viewModel.fetchSchedule(for: selectedArtist, days: daysToShow)
         }
         // When booking succeeds dismiss sheet and switch to profile tab
         .onChange(of: viewModel.bookingSuccess) { success in

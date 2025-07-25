@@ -15,6 +15,9 @@ final class TimeSelectionViewModel: ObservableObject {
     @Published var bookingSuccess = false
     @Published var isCreating = false
 
+    /// Number of days ahead to fetch bookings for. Default is one week.
+    private var daysWindow: Int = 7
+
     private let db = Database.database().reference()
     private let calendar = Calendar.current
     private let dateFormatter: DateFormatter = {
@@ -55,11 +58,14 @@ final class TimeSelectionViewModel: ObservableObject {
         }
     }
 
-    /// Fetch bookings for the upcoming week and populate ``weeklyReserved``.
-    /// - Parameter artistId: Identifier of the artist.
-    func fetchWeeklySchedule(for artistId: String) async {
+    /// Fetch bookings for the upcoming days and populate ``weeklyReserved``.
+    /// - Parameters:
+    ///   - artistId: Identifier of the artist.
+    ///   - days: Number of days ahead to fetch.
+    func fetchSchedule(for artistId: String, days: Int) async {
         error = nil
         weeklyReserved = [:]
+        daysWindow = days
         do {
             // Fetch all bookings for the artist in a single query
             let snapshot = try await db.child("bookings")
@@ -67,7 +73,7 @@ final class TimeSelectionViewModel: ObservableObject {
                 .queryEqual(toValue: artistId)
                 .getData()
 
-            let validDates: [String] = (0..<7).compactMap { offset in
+            let validDates: [String] = (0..<days).compactMap { offset in
                 guard let date = calendar.date(byAdding: .day, value: offset, to: calendar.startOfDay(for: Date())) else { return nil }
                 return dateFormatter.string(from: date)
             }
@@ -119,7 +125,7 @@ final class TimeSelectionViewModel: ObservableObject {
             let ref = db.child("bookings").childByAutoId()
             try await ref.setValue(data)
             bookingSuccess = true
-            await fetchWeeklySchedule(for: artistId)
+            await fetchSchedule(for: artistId, days: daysWindow)
         } catch {
             // Surface network connectivity issues to the view.
             if let urlError = error as? URLError,
