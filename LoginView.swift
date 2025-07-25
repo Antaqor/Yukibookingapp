@@ -8,36 +8,47 @@ struct LoginView: View {
     @State private var showResetAlert = false
     @State private var resetMessage = ""
 
-    // Wrapping fields in ``Form`` helps avoid Auto Layout warnings
-    // related to the keyboard's accessory view on iPad/macOS.
+    private func filterASCII(_ value: String) -> String {
+        String(value.filter { $0.isASCII })
+    }
+
     var body: some View {
-        Form {
-            Section {
-                TextField("Email", text: $email)
-                    .keyboardType(.emailAddress)
-                    .textContentType(.emailAddress)
-                    .autocapitalization(.none)
+        NavigationView {
+            VStack(spacing: 24) {
+                Spacer()
 
-                SecureField("Password", text: $password)
-                    .textContentType(.password)
-            }
+                Text("Welcome Back")
+                    .font(.system(size: 28, weight: .bold))
 
-            if let error = authVM.error, !error.isEmpty {
-                Section {
+                VStack(spacing: 16) {
+                    TextField("Email", text: $email)
+                        .keyboardType(.emailAddress)
+                        .textContentType(.emailAddress)
+                        .autocapitalization(.none)
+                        .textFieldStyle(.roundedBorder)
+                        .onChange(of: email) { email = filterASCII($0) }
+
+                    SecureField("Password", text: $password)
+                        .textContentType(.password)
+                        .textFieldStyle(.roundedBorder)
+                        .onChange(of: password) { password = filterASCII($0) }
+                }
+
+                if let error = authVM.error, !error.isEmpty {
                     Text(error)
                         .foregroundColor(.red)
                 }
-            }
 
-            Section {
                 Button(action: {
                     Task { await authVM.login(email: email, password: password) }
                 }) {
                     Text("Log In")
-                        .frame(maxWidth: .infinity)
+                        .font(.system(size: 16, weight: .semibold))
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .background(Color("AccentColor"))
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(Color("AccentColor"))
                 .disabled(authVM.isLoading)
 
                 Button("Forgot Password?") {
@@ -48,24 +59,31 @@ struct LoginView: View {
                     }
                 }
                 .font(.footnote)
-                .padding(.top, -4)
 
-                Button("Register") {
-                    showRegister = true
-                }
-                .buttonStyle(.bordered)
-                .tint(Color("AccentColor"))
-                .sheet(isPresented: $showRegister) {
-                    RegisterView().environmentObject(authVM)
-                }
+                Button("Register") { showRegister = true }
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(maxWidth: .infinity, minHeight: 50)
+                    .foregroundColor(Color("AccentColor"))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color("AccentColor"), lineWidth: 1)
+                    )
+                    .sheet(isPresented: $showRegister) {
+                        RegisterView().environmentObject(authVM)
+                    }
 
                 if authVM.isLoading { ProgressView() }
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 40)
+            .background(Color.white.ignoresSafeArea())
+            .alert(resetMessage, isPresented: $showResetAlert) {
+                Button("OK", role: .cancel) { }
             }
         }
-        .padding(.vertical)
-        .alert(resetMessage, isPresented: $showResetAlert) {
-            Button("OK", role: .cancel) { }
-        }
+        .navigationBarHidden(true)
     }
 }
 
