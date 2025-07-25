@@ -6,8 +6,8 @@ struct TimeSlot: Identifiable {
 }
 
 struct TimeSelectionView: View {
-    /// Identifier of the artist the user wants to book.
-    var selectedArtist: String
+    /// The artist the user wants to book.
+    var artist: Artist
     /// Number of days ahead to display for booking. Defaults to one week.
     var daysToShow: Int = 7
     @State private var selectedSlot: Int?
@@ -16,9 +16,10 @@ struct TimeSelectionView: View {
     @EnvironmentObject private var router: TabRouter
     @Environment(\.presentationMode) private var presentationMode
 
-    /// Available booking slots from 9 AM to 6 PM.
-    let timeSlots: [TimeSlot] = (9...18).map { hour in
-        TimeSlot(id: hour, time: String(format: "%02d:00", hour))
+    /// Available booking slots based on the artist's schedule.
+    private var timeSlots: [TimeSlot] {
+        let hours = artist.availableTimes.isEmpty ? Array(9...18) : artist.availableTimes
+        return hours.map { TimeSlot(id: $0, time: String(format: "%02d:00", $0)) }
     }
 
     /// All selectable dates computed based on ``daysToShow``.
@@ -86,7 +87,7 @@ struct TimeSelectionView: View {
 
             Button(action: {
                 if let date = selectedDateString, let slot = selectedSlot {
-                    Task { await viewModel.createBooking(for: selectedArtist, date: date, slot: slot) }
+                    Task { await viewModel.createBooking(for: artist.id, date: date, slot: slot) }
                 }
             }) {
                 Text("Баталгаажуулах")
@@ -114,7 +115,7 @@ struct TimeSelectionView: View {
         .navigationTitle("Цаг авах")
         .navigationBarTitleDisplayMode(.inline)
         .task {
-            await viewModel.fetchSchedule(for: selectedArtist, days: daysToShow)
+            await viewModel.fetchSchedule(for: artist.id, days: daysToShow)
         }
         // When booking succeeds dismiss sheet and switch to profile tab
         .onChange(of: viewModel.bookingSuccess) { success in

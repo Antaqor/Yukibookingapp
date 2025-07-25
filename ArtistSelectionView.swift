@@ -50,7 +50,7 @@ struct ArtistSelectionView: View {
             .sheet(isPresented: $showBooking) {
                 if let artist = selectedArtist {
                     // Show only the next three days when booking
-                    TimeSelectionView(selectedArtist: artist.id, daysToShow: 3)
+                    TimeSelectionView(artist: artist, daysToShow: 3)
                 }
             }
             .task { await viewModel.fetchArtists() }

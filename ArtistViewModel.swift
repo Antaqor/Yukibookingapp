@@ -18,7 +18,8 @@ final class ArtistViewModel: ObservableObject {
                 if let value = child.value as? [String: Any] {
                     let name = value["name"] as? String ?? ""
                     let locationId = value["locationId"] as? Int
-                    loaded.append(Artist(id: child.key, name: name, locationId: locationId))
+                    let times = value["availableTimes"] as? [Int] ?? []
+                    loaded.append(Artist(id: child.key, name: name, locationId: locationId, availableTimes: times))
                 }
             }
             artists = loaded
@@ -52,7 +53,8 @@ final class ArtistViewModel: ObservableObject {
                     try await db.child("users").child(userSnap.key).child("role").setValue("artist")
                     try await db.child("artists").child(userSnap.key).setValue([
                         "name": name,
-                        "locationId": NSNull()
+                        "locationId": NSNull(),
+                        "availableTimes": Array(9...18)
                     ])
                     await fetchArtists()
                     return
