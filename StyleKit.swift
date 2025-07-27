@@ -7,6 +7,8 @@ extension Color {
     /// Primary brand color #E4897C
     static let brand = Color(red: 228/255, green: 137/255, blue: 124/255)
     static let fieldBG = Color(.systemGray6)
+    /// Soft neutral background color #F7F7F7
+    static let softBackground = Color(red: 247/255, green: 247/255, blue: 247/255)
 }
 
 // Primary filled button
@@ -50,7 +52,7 @@ struct SurfaceCard<Content: View>: View {
             content
         }
         .padding(20)
-        .background(Color.white)
+        .background(Color.softBackground)
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: .black.opacity(0.06), radius: 18, x: 0, y: 12)
         .padding(.horizontal, 16)
