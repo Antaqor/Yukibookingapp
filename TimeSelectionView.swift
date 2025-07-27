@@ -10,6 +10,8 @@ struct TimeSelectionView: View {
     var artist: Artist
     /// Number of days ahead to display for booking. Defaults to one week.
     var daysToShow: Int = 7
+    /// Optional callback executed when a booking is successfully created.
+    var onSuccess: (() -> Void)? = nil
     @State private var selectedSlot: Int?
     @State private var selectedDateString: String?
     @StateObject private var viewModel = TimeSelectionViewModel()
@@ -117,9 +119,10 @@ struct TimeSelectionView: View {
         .task {
             await viewModel.fetchSchedule(for: artist.id, days: daysToShow)
         }
-        // When booking succeeds dismiss sheet and switch to profile tab
+        // When booking succeeds notify parent, dismiss sheet and switch to profile tab
         .onChange(of: viewModel.bookingSuccess) { success in
             if success {
+                onSuccess?()
                 presentationMode.wrappedValue.dismiss()
                 router.selection = 1
             }
