@@ -35,6 +35,11 @@ struct ArtistDashboardView: View {
         }
     }
 
+    private func loadBookings() async {
+        guard let uid = authVM.user?.uid else { return }
+        await bookingVM.fetchBookings(artistId: uid)
+    }
+
     var body: some View {
         NavigationView {
             List {
@@ -52,7 +57,7 @@ struct ArtistDashboardView: View {
                             Button("Accept") {
                                 Task {
                                     await bookingVM.updateBooking(booking, to: "accepted")
-                                    await bookingVM.fetchBookings(artistId: authVM.user?.uid)
+                                    await loadBookings()
                                 }
                             }
                             .disabled(booking.status == "accepted")
@@ -60,7 +65,7 @@ struct ArtistDashboardView: View {
                             Button("Cancel") {
                                 Task {
                                     await bookingVM.updateBooking(booking, to: "canceled")
-                                    await bookingVM.fetchBookings(artistId: authVM.user?.uid)
+                                    await loadBookings()
                                 }
                             }
                             .tint(.red)
@@ -84,10 +89,16 @@ struct ArtistDashboardView: View {
             }
             .task {
                 await artistVM.fetchArtists()
-                await bookingVM.fetchBookings(artistId: authVM.user?.uid)
+                await loadBookings()
             }
             .refreshable {
-                await bookingVM.fetchBookings(artistId: authVM.user?.uid)
+                await loadBookings()
+            }
+            .onAppear {
+                Task { await loadBookings() }
+            }
+            .onChange(of: authVM.user?.uid ?? "") { _ in
+                Task { await loadBookings() }
             }
         }
     }
