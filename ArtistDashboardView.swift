@@ -86,6 +86,9 @@ struct ArtistDashboardView: View {
                 await artistVM.fetchArtists()
                 await bookingVM.fetchBookings(artistId: authVM.user?.uid)
             }
+            .refreshable {
+                await bookingVM.fetchBookings(artistId: authVM.user?.uid)
+            }
         }
     }
 }
