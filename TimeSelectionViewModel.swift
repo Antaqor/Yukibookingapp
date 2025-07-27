@@ -127,6 +127,9 @@ final class TimeSelectionViewModel: ObservableObject {
         do {
             let ref = db.child("bookings").childByAutoId()
             try await ref.setValue(data)
+            // Remove the booked time from the artist's available times so
+            // other users no longer see it as selectable.
+            await removeBookedTime(from: artistId, at: slot)
             bookingSuccess = true
             await fetchSchedule(for: artistId, days: daysWindow)
         } catch {
@@ -139,5 +142,23 @@ final class TimeSelectionViewModel: ObservableObject {
             }
         }
         isCreating = false
+    }
+
+    /// Remove a booked hour from the artist's `availableTimes` array in Firebase.
+    /// - Parameters:
+    ///   - artistId: Identifier of the artist whose schedule is updated.
+    ///   - time: Hour value that was just booked.
+    private func removeBookedTime(from artistId: String, at time: Int) async {
+        let artistRef = db.child("artists").child(artistId).child("availableTimes")
+        do {
+            let snapshot = try await artistRef.getData()
+            var times = snapshot.value as? [Int] ?? []
+            times.removeAll { $0 == time }
+            try await artistRef.setValue(times)
+        } catch {
+            // Failing to update the schedule shouldn't stop the booking flow,
+            // so just log the error for debugging purposes.
+            print("Failed to update artist times: \(error.localizedDescription)")
+        }
     }
 }
