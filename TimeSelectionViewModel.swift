@@ -7,7 +7,7 @@ import FirebaseDatabase
 @MainActor
 final class TimeSelectionViewModel: ObservableObject {
     /// Set of booked slots (represented by hour integer) that have
-    /// already been accepted by an admin for a single day.
+    /// already been requested (pending or accepted) for a single day.
     @Published var reservedSlots: Set<Int> = []
     /// Mapping between date string and all reserved hours for that day.
     @Published var weeklyReserved: [String: Set<Int>] = [:]
@@ -26,7 +26,7 @@ final class TimeSelectionViewModel: ObservableObject {
         return formatter
     }()
 
-    /// Fetch all accepted bookings for the provided artist on a given date.
+    /// Fetch all non-canceled bookings for the provided artist on a given date.
     /// - Parameters:
     ///   - artistId: Identifier of the artist to filter bookings.
     ///   - date: Booking date in yyyy-MM-dd format.
@@ -40,7 +40,7 @@ final class TimeSelectionViewModel: ObservableObject {
             let hours = (snapshot.children.allObjects as? [DataSnapshot])?.compactMap { snap -> Int? in
                 guard
                     let data = snap.value as? [String: Any],
-                    data["status"] as? String == "accepted",
+                    data["status"] as? String != "canceled",
                     data["date"] as? String == date,
                     let timeString = data["time"] as? String
                 else { return nil }
@@ -59,6 +59,7 @@ final class TimeSelectionViewModel: ObservableObject {
     }
 
     /// Fetch bookings for the upcoming days and populate ``weeklyReserved``.
+    /// Only bookings that have not been canceled are considered.
     /// - Parameters:
     ///   - artistId: Identifier of the artist.
     ///   - days: Number of days ahead to fetch.
@@ -82,7 +83,7 @@ final class TimeSelectionViewModel: ObservableObject {
             for child in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
                 guard
                     let data = child.value as? [String: Any],
-                    data["status"] as? String == "accepted",
+                    data["status"] as? String != "canceled",
                     let date = data["date"] as? String,
                     let time = data["time"] as? String,
                     let hour = Int(time.prefix(2)),
