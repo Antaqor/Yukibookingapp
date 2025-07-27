@@ -2,22 +2,15 @@ import Foundation
 import FirebaseAuth
 import FirebaseDatabase
 
-/// View model responsible for handling booking creation and fetching
-/// reserved time slots for a particular artist.
 @MainActor
 final class TimeSelectionViewModel: ObservableObject {
-    /// Set of booked slots (represented by hour integer) that have
-    /// already been requested (pending or accepted) for a single day.
     @Published var reservedSlots: Set<Int> = []
-    /// Mapping between date string and all reserved hours for that day.
     @Published var weeklyReserved: [String: Set<Int>] = [:]
     @Published var error: String?
     @Published var bookingSuccess = false
     @Published var isCreating = false
 
-    /// Number of days ahead to fetch bookings for. Default is one week.
     private var daysWindow: Int = 7
-
     private let db = Database.database().reference()
     private let calendar = Calendar.current
     private let dateFormatter: DateFormatter = {
@@ -26,10 +19,6 @@ final class TimeSelectionViewModel: ObservableObject {
         return formatter
     }()
 
-    /// Fetch all non-canceled bookings for the provided artist on a given date.
-    /// - Parameters:
-    ///   - artistId: Identifier of the artist to filter bookings.
-    ///   - date: Booking date in yyyy-MM-dd format.
     func fetchReservedSlots(for artistId: String, date: String) async {
         error = nil
         do {
@@ -49,9 +38,7 @@ final class TimeSelectionViewModel: ObservableObject {
             } ?? []
             reservedSlots = Set(hours)
         } catch {
-            // Firebase surfaces connectivity issues through ``URLError``.
-            if let urlError = error as? URLError,
-               urlError.code == .notConnectedToInternet {
+            if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
                 self.error = "Unable to fetch slots. Check your internet connection."
             } else {
                 self.error = error.localizedDescription
@@ -59,17 +46,11 @@ final class TimeSelectionViewModel: ObservableObject {
         }
     }
 
-    /// Fetch bookings for the upcoming days and populate ``weeklyReserved``.
-    /// Only bookings that have not been canceled are considered.
-    /// - Parameters:
-    ///   - artistId: Identifier of the artist.
-    ///   - days: Number of days ahead to fetch.
     func fetchSchedule(for artistId: String, days: Int) async {
         error = nil
         weeklyReserved = [:]
         daysWindow = days
         do {
-            // Fetch all bookings for the artist in a single query
             let snapshot = try await db.child("bookings")
                 .queryOrdered(byChild: "artistId")
                 .queryEqual(toValue: artistId)
@@ -95,8 +76,7 @@ final class TimeSelectionViewModel: ObservableObject {
             }
             weeklyReserved = schedule
         } catch {
-            if let urlError = error as? URLError,
-               urlError.code == .notConnectedToInternet {
+            if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
                 self.error = "Unable to fetch slots. Check your internet connection."
             } else {
                 self.error = error.localizedDescription
@@ -104,11 +84,7 @@ final class TimeSelectionViewModel: ObservableObject {
         }
     }
 
-    /// Create a new booking with `pending` status.
-    /// - Parameters:
-    ///   - artistId: The selected artist identifier.
-    ///   - date: Booking date in yyyy-MM-dd format.
-    ///   - slot: Hour value for the booking.
+    /// Create a new booking
     func createBooking(for artistId: String, date: String, slot: Int) async {
         guard let uid = Auth.auth().currentUser?.uid else {
             error = "User not logged in"
@@ -127,15 +103,11 @@ final class TimeSelectionViewModel: ObservableObject {
         do {
             let ref = db.child("bookings").childByAutoId()
             try await ref.setValue(data)
-            // Remove the booked time from the artist's available times so
-            // other users no longer see it as selectable.
             await removeBookedTime(from: artistId, at: slot)
             bookingSuccess = true
             await fetchSchedule(for: artistId, days: daysWindow)
         } catch {
-            // Surface network connectivity issues to the view.
-            if let urlError = error as? URLError,
-               urlError.code == .notConnectedToInternet {
+            if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
                 self.error = "Unable to create booking. Check your internet connection."
             } else {
                 self.error = error.localizedDescription
@@ -144,10 +116,6 @@ final class TimeSelectionViewModel: ObservableObject {
         isCreating = false
     }
 
-    /// Remove a booked hour from the artist's `availableTimes` array in Firebase.
-    /// - Parameters:
-    ///   - artistId: Identifier of the artist whose schedule is updated.
-    ///   - time: Hour value that was just booked.
     private func removeBookedTime(from artistId: String, at time: Int) async {
         let artistRef = db.child("artists").child(artistId).child("availableTimes")
         do {
@@ -156,8 +124,6 @@ final class TimeSelectionViewModel: ObservableObject {
             times.removeAll { $0 == time }
             try await artistRef.setValue(times)
         } catch {
-            // Failing to update the schedule shouldn't stop the booking flow,
-            // so just log the error for debugging purposes.
             print("Failed to update artist times: \(error.localizedDescription)")
         }
     }

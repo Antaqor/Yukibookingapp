@@ -1,35 +1,41 @@
 import SwiftUI
 
 /// Entry point of the application.
-/// Uses the MVVM architecture by injecting the ``AuthViewModel``
-/// into the environment for all child views.
-
+/// Injects AuthViewModel once at the root.
 @main
-struct YukiAppApp: App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+struct YukiApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     @StateObject private var authVM = AuthViewModel()
     @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
 
     var body: some Scene {
         WindowGroup {
             Group {
-                if authVM.user == nil {
+                switch (authVM.user, authVM.role) {
+                case (nil, _):
+                    // First time -> Register, дараагийн удаа -> Login (гараар сольж болно)
                     if hasLaunchedBefore {
-                        LoginView().environmentObject(authVM)
+                        LoginView()
                     } else {
-                        RegisterView().environmentObject(authVM)
+                        RegisterView()
                     }
-                } else if authVM.role == "admin" {
-                    AdminTabView().environmentObject(authVM)
-                } else if authVM.role == "artist" {
-                    ArtistTabView().environmentObject(authVM)
-                } else if authVM.role == "user" {
-                    MainTabView().environmentObject(authVM)
-                } else {
+
+                case (_, "admin"):
+                    AdminTabView()
+
+                case (_, "artist"):
+                    ArtistTabView()
+
+                case (_, "user"):
+                    MainTabView()
+
+                default:
                     ProgressView()
                 }
             }
             .tint(Color("AccentColor"))
+            .environmentObject(authVM)
         }
     }
 }

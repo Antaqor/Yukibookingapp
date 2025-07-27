@@ -8,31 +8,69 @@ final class BookingViewModel: ObservableObject {
 
     private let db = Database.database().reference()
 
-    /// Fetch bookings. If `artistId` or `userId` is provided the list is
-    /// filtered accordingly.
+    // — Helper: нэг удаа retry хийдэг getData
+    private func getDataWithRetry(_ query: DatabaseQuery) async throws -> DataSnapshot {
+        do {
+            return try await query.getData()
+        } catch {
+            // оффлайн/кэш асуудал → онлайн болгож багахан хүлээгээд дахин оролдоно
+            Database.database().goOnline()
+            try? await Task.sleep(nanoseconds: 400_000_000) // 0.4s
+            return try await query.getData()
+        }
+    }
+
+    /// Fetch bookings. If `artistId` or `userId` is provided the list is filtered accordingly.
+    /// Robust: server-side filter → хоосон/алдаа бол all fetch + client-side filter.
     func fetchBookings(artistId: String? = nil, userId: String? = nil) async {
         error = nil
         do {
             let ref = db.child("bookings")
-            // Result from Realtime Database query. `DataSnapshot` represents
-            // a single node returned from Firebase. Ensure the type name is
-            // spelled correctly to avoid compilation errors.
-            let snapshot: DataSnapshot
-            if let artistId {
-                snapshot = try await ref
-                    .queryOrdered(byChild: "artistId")
-                    .queryEqual(toValue: artistId)
-                    .getData()
-            } else if let userId {
-                snapshot = try await ref
-                    .queryOrdered(byChild: "userId")
-                    .queryEqual(toValue: userId)
-                    .getData()
+
+            #if DEBUG
+            print("⏳ fetchBookings(artistId: \(artistId ?? "nil"), userId: \(userId ?? "nil"))")
+            #endif
+
+            var serverRows: [DataSnapshot] = []
+
+            // 1) Server-side filter оролдъё
+            if let aId = artistId, !aId.isEmpty {
+                let snap = try await getDataWithRetry(
+                    ref.queryOrdered(byChild: "artistId").queryEqual(toValue: aId)
+                )
+                serverRows = (snap.children.allObjects as? [DataSnapshot]) ?? []
+                #if DEBUG
+                print("👀 server query (artistId) count:", snap.childrenCount)
+                #endif
+            } else if let uId = userId, !uId.isEmpty {
+                let snap = try await getDataWithRetry(
+                    ref.queryOrdered(byChild: "userId").queryEqual(toValue: uId)
+                )
+                serverRows = (snap.children.allObjects as? [DataSnapshot]) ?? []
+                #if DEBUG
+                print("👀 server query (userId) count:", snap.childrenCount)
+                #endif
             } else {
-                snapshot = try await ref.getData()
+                let snap = try await getDataWithRetry(ref)
+                serverRows = (snap.children.allObjects as? [DataSnapshot]) ?? []
+                #if DEBUG
+                print("👀 server query (no filter) count:", serverRows.count)
+                #endif
             }
+
+            // 2) Хэрэв filter‑тэй мөртлөө хоосон бол: ALL → client-side filter
+            var rows = serverRows
+            if rows.isEmpty, (artistId != nil || userId != nil) {
+                #if DEBUG
+                print("⚠️ server empty → fallback to ALL + client-side filter")
+                #endif
+                let all = try await getDataWithRetry(ref)
+                rows = (all.children.allObjects as? [DataSnapshot]) ?? []
+            }
+
+            // 3) Parse
             var loaded: [Booking] = []
-            for child in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
+            for child in rows {
                 guard let value = child.value as? [String: Any] else { continue }
                 let booking = Booking(
                     id: child.key,
@@ -46,39 +84,35 @@ final class BookingViewModel: ObservableObject {
                 loaded.append(booking)
             }
 
-            // Filter client side as an extra safety measure in case the
-            // database query doesn't apply correctly for some reason.
-            if let artistId {
-                loaded = loaded.filter { $0.artistId == artistId }
-            } else if let userId {
-                loaded = loaded.filter { $0.userId == userId }
+            // 4) Client-side filter (extra safety)
+            if let aId = artistId, !aId.isEmpty {
+                loaded = loaded.filter { $0.artistId == aId }
+            } else if let uId = userId, !uId.isEmpty {
+                loaded = loaded.filter { $0.userId == uId }
             }
 
             self.bookings = loaded.sorted { $0.createdAt > $1.createdAt }
+
+            #if DEBUG
+            print("✅ loaded bookings count:", self.bookings.count)
+            #endif
         } catch {
-            // Attempt to surface a more friendly message when the
-            // device has no internet connectivity. Firebase currently
-            // reports this as a generic `URLError` from the URL loading
-            // system so we check for it explicitly.
-            if let urlError = error as? URLError,
-               urlError.code == .notConnectedToInternet {
+            if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
                 self.error = "Unable to fetch bookings. Check your internet connection."
             } else {
                 self.error = error.localizedDescription
             }
+            #if DEBUG
+            print("❌ fetchBookings error:", self.error ?? "unknown")
+            #endif
         }
     }
 
-    /// Update the status of a booking document
-    /// - Parameters:
-    ///   - booking: The booking to update.
-    ///   - status: New status string. Must not be empty.
     func updateBooking(_ booking: Booking, to status: String) async {
         guard !status.isEmpty else {
             error = "Invalid status"
             return
         }
-
         let ref = db.child("bookings").child(booking.id).child("status")
         do {
             try await ref.setValue(status)
@@ -86,10 +120,7 @@ final class BookingViewModel: ObservableObject {
                 bookings[index].status = status
             }
         } catch {
-            // Similar to ``fetchBookings`` we try to detect if the
-            // operation failed due to connectivity issues.
-            if let urlError = error as? URLError,
-               urlError.code == .notConnectedToInternet {
+            if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
                 self.error = "Unable to update booking. Check your internet connection."
             } else {
                 self.error = error.localizedDescription
