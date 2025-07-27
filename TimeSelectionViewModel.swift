@@ -40,6 +40,7 @@ final class TimeSelectionViewModel: ObservableObject {
             let hours = (snapshot.children.allObjects as? [DataSnapshot])?.compactMap { snap -> Int? in
                 guard
                     let data = snap.value as? [String: Any],
+                    data["artistId"] as? String == artistId,
                     data["status"] as? String != "canceled",
                     data["date"] as? String == date,
                     let timeString = data["time"] as? String
@@ -83,6 +84,7 @@ final class TimeSelectionViewModel: ObservableObject {
             for child in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
                 guard
                     let data = child.value as? [String: Any],
+                    data["artistId"] as? String == artistId,
                     data["status"] as? String != "canceled",
                     let date = data["date"] as? String,
                     let time = data["time"] as? String,

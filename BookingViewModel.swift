@@ -45,6 +45,15 @@ final class BookingViewModel: ObservableObject {
                 )
                 loaded.append(booking)
             }
+
+            // Filter client side as an extra safety measure in case the
+            // database query doesn't apply correctly for some reason.
+            if let artistId {
+                loaded = loaded.filter { $0.artistId == artistId }
+            } else if let userId {
+                loaded = loaded.filter { $0.userId == userId }
+            }
+
             self.bookings = loaded.sorted { $0.createdAt > $1.createdAt }
         } catch {
             // Attempt to surface a more friendly message when the
