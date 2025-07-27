@@ -6,13 +6,10 @@ struct ArtistDashboardView: View {
     @StateObject private var bookingVM = BookingViewModel()
     @StateObject private var artistVM = ArtistViewModel()
 
-    /// Name of the location this artist is assigned to.
-    private var locationName: String {
-        guard
-            let id = artistVM.artists.first(where: { $0.id == authVM.user?.uid })?.locationId,
-            let location = locations.first(where: { $0.id == id })
-        else { return "" }
-        return location.name
+    /// Location this artist is assigned to, resolved from ``locations``.
+    private var currentLocation: Location? {
+        guard let id = artistVM.artists.first(where: { $0.id == authVM.user?.uid })?.locationId else { return nil }
+        return locations.first(where: { $0.id == id })
     }
 
     private func formattedDate(_ timestamp: TimeInterval) -> String {
@@ -76,10 +73,14 @@ struct ArtistDashboardView: View {
                     .padding(.horizontal, 4)
                     .background(RoundedRectangle(cornerRadius: 8).fill(statusColor(for: booking.status)))
                 }
-                if !locationName.isEmpty {
-                    Section {
-                        Text("Location: \(locationName)")
+                Section {
+                    if let location = currentLocation {
+                        Text("Location: \(location.name)")
                             .font(.headline)
+                    } else {
+                        Text("Location: Not set")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
                     }
                 }
             }
