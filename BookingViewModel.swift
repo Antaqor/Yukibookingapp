@@ -12,6 +12,9 @@ final class BookingViewModel: ObservableObject {
     /// filtered accordingly.
     func fetchBookings(artistId: String? = nil, userId: String? = nil) async {
         error = nil
+        // Clear previously loaded results so switching between artists
+        // doesn't display stale bookings when the fetch fails or is pending.
+        bookings = []
         do {
             let ref = db.child("bookings")
             // Result from Realtime Database query. `DataSnapshot` represents
