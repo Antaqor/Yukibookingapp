@@ -17,8 +17,9 @@ struct LoginView: View {
             VStack(spacing: 24) {
                 Spacer()
 
-                Text("Welcome Back")
-                    .font(.system(size: 28, weight: .bold))
+                Text("Yuki Salon")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(Color("AccentColor"))
 
                 VStack(spacing: 16) {
                     TextField("Email", text: $email)
