@@ -22,15 +22,15 @@ struct LoginView: View {
 
             ScrollView {
                 VStack(spacing: 24) {
-                    Text("Yuki Salon")
+                    Text("Юки салон")
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(.brand)
                         .padding(.top, 28)
 
-                    SurfaceCard(title: "Welcome Back") {
+                    SurfaceCard(title: "Дахин тавтай морил") {
                         VStack(spacing: 14) {
                             // Email
-                            TextField("Email", text: $email)
+                            TextField("Имэйл", text: $email)
                                 .keyboardType(.emailAddress)
                                 .textContentType(.username)
                                 .textInputAutocapitalization(.never)
@@ -50,7 +50,7 @@ struct LoginView: View {
                                 .onSubmit { focus = .password }
 
                             // Password
-                            SecureField("Password", text: $password)
+                            SecureField("Нууц үг", text: $password)
                                 .textContentType(.password)
                                 .focused($focus, equals: .password)
                                 .onChange(of: password) { _, new in password = ascii(new) }
@@ -73,15 +73,15 @@ struct LoginView: View {
                             }
 
                             Button { login() } label: {
-                                Text("Log In").font(.system(size: 16, weight: .semibold))
+                                Text("Нэвтрэх").font(.system(size: 16, weight: .semibold))
                             }
                             .buttonStyle(PrimaryButtonStyle())
                             .disabled(!isLoginEnabled || authVM.isLoading)
 
-                            Button("Forgot Password?") {
+                            Button("Нууц үгээ мартсан уу?") {
                                 Task {
                                     await authVM.resetPassword(email: email)
-                                    resetMessage = "If an account exists, a reset email has been sent."
+                                    resetMessage = "Хэрэв бүртгэл байгаа бол сэргээх имэйл илгээгдсэн."
                                     showResetAlert = true
                                 }
                             }
@@ -95,7 +95,7 @@ struct LoginView: View {
                                 showRegister = true
                                 Haptics.tap()
                             } label: {
-                                Text("Create Account")
+                                Text("Бүртгэл үүсгэх")
                                     .font(.system(size: 16, weight: .semibold))
                             }
                             .buttonStyle(SecondaryButtonStyle())
@@ -113,7 +113,7 @@ struct LoginView: View {
             RegisterView().environmentObject(authVM)
         }
         .alert(resetMessage, isPresented: $showResetAlert) {
-            Button("OK", role: .cancel) {}
+            Button("ОК", role: .cancel) {}
         }
         .onAppear { focus = .email }
     }

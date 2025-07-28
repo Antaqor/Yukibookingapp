@@ -30,14 +30,14 @@ struct DashboardView: View {
             List {
                 ForEach(bookingVM.bookings) { booking in
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("User: \(booking.userId)")
-                        Text("Date: \(booking.date)")
-                        Text("Time: \(booking.time)")
-                        Text("Booked: \(formattedDate(booking.createdAt))")
-                        Text("Status: \(booking.status)")
+                        Text("Хэрэглэгч: \(booking.userId)")
+                        Text("Огноо: \(booking.date)")
+                        Text("Цаг: \(booking.time)")
+                        Text("Захиалсан: \(formattedDate(booking.createdAt))")
+                        Text("Төлөв: \(booking.status)")
                             .fontWeight(.semibold)
                         HStack {
-                            Button("Accept") {
+                            Button("Зөвшөөрөх") {
                                 Task {
                                     await bookingVM.updateBooking(booking, to: "accepted")
                                     await bookingVM.fetchBookings()
@@ -45,7 +45,7 @@ struct DashboardView: View {
                             }
                             .disabled(booking.status == "accepted")
 
-                            Button("Cancel") {
+                            Button("Цуцлах") {
                                 Task {
                                     await bookingVM.updateBooking(booking, to: "canceled")
                                     await bookingVM.fetchBookings()
@@ -60,9 +60,9 @@ struct DashboardView: View {
                     .background(RoundedRectangle(cornerRadius: 8).fill(statusColor(for: booking.status)))
                 }
             }
-            .navigationTitle("Dashboard")
+            .navigationTitle("Самбар")
             .toolbar {
-                Button("Sign Out") { authVM.signOut() }
+                Button("Гарах") { authVM.signOut() }
             }
             .task { await bookingVM.fetchBookings() }
         }

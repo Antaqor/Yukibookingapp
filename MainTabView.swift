@@ -12,7 +12,7 @@ struct MainTabView: View {
             }
             .tabItem {
                 Image(systemName: "house")
-                Text("Home")
+                Text("Нүүр")
             }
             .tag(0)
 
@@ -21,7 +21,7 @@ struct MainTabView: View {
             }
             .tabItem {
                 Image(systemName: "person")
-                Text("Profile")
+                Text("Профайл")
             }
             .tag(1)
         }

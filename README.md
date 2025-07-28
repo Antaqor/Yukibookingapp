@@ -1,13 +1,13 @@
-# Yuki Booking App
+# Юки захиалгын апп
 
-This project is a SwiftUI demo using Firebase Authentication and Realtime Database.
+Энэ төсөл нь Firebase Нэвтрэлт болон Realtime Database ашигласан SwiftUI-ийн демо юм.
 
-## Simulator warnings
+## Симуляторын анхааруулга
 
-While running on the iOS simulator you may see logs such as:
+iOS симулятор дээр ажиллуулах үед дараах лог гарч ирж магадгүй:
 
 ```
 load_eligibility_plist: Failed to open ... eligibility.plist: No such file or directory
 ```
 
-This comes from the simulator's Touch ID / Face ID subsystem and does not affect the app. Clearing derived data or resetting the simulator will remove the warning.
+Энэ нь симуляторын Touch ID/Face ID дэд системээс үүдэлтэй бөгөөд аппд нөлөөлөхгүй. Derived data-гаа цэвэрлэх эсвэл симуляторыг reset хийхэд энэхүү анхааруулга алга болно.

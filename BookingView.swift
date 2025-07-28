@@ -9,7 +9,7 @@ struct BookingView: View {
             Text("Цаг захиалах")
                 .font(.title)
             Text("Салбар: \(location?.name ?? "-")")
-            Text("Artist: \(artist?.name ?? "-")")
+            Text("Артист: \(artist?.name ?? "-")")
             // Add booking form here
             Button("Хаах") { }
         }

@@ -38,7 +38,7 @@ struct LocationSelectionView: View {
             Spacer()
         }
         .padding(.horizontal, 16)
-        .navigationTitle("Locations")
+        .navigationTitle("Салбарууд")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

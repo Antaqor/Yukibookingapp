@@ -24,7 +24,7 @@ struct BranchArtistsView: View {
 
     var body: some View {
         List {
-            Section(header: Text("Artists")) {
+            Section(header: Text("Артистууд")) {
                 ForEach(artistVM.artists.filter { $0.locationId == location.id }) { artist in
                     Button(action: {
                         selectedArtist = artist
@@ -43,16 +43,16 @@ struct BranchArtistsView: View {
             }
 
             if let artist = selectedArtist {
-                Section(header: Text("Bookings for \(artist.name)")) {
+                Section(header: Text("\(artist.name)-ийн захиалгууд")) {
                     ForEach(bookingVM.bookings) { booking in
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Date: \(booking.date)")
-                            Text("Time: \(booking.time)")
-                            Text("Booked: \(formattedDate(booking.createdAt))")
-                            Text("Status: \(booking.status)")
+                            Text("Огноо: \(booking.date)")
+                            Text("Цаг: \(booking.time)")
+                            Text("Захиалсан: \(formattedDate(booking.createdAt))")
+                            Text("Төлөв: \(booking.status)")
                         }
                     }
-                    Button("Book time") {
+                    Button("Цаг авах") {
                         showingTimeSelection = true
                     }
                 }

@@ -13,14 +13,14 @@ struct EmailAuthView: View {
     var body: some View {
         Form {
             Section {
-                TextField("Name", text: $name)
-                TextField("Phone", text: $phone)
+                TextField("Нэр", text: $name)
+                TextField("Утас", text: $phone)
                     .keyboardType(.phonePad)
-                TextField("Email", text: $email)
+                TextField("Имэйл", text: $email)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
-                SecureField("Password (min 6 chars)", text: $password)
-                SecureField("Confirm Password", text: $confirmPassword)
+                SecureField("Нууц үг (хамгийн бага 6 тэмдэгт)", text: $password)
+                SecureField("Нууц үг давтах", text: $confirmPassword)
             }
 
             if let error = authVM.error, !error.isEmpty {
@@ -31,13 +31,13 @@ struct EmailAuthView: View {
             }
 
             Section {
-                Button("Log In") {
+                Button("Нэвтрэх") {
                     Task { await authVM.login(email: email, password: password) }
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(authVM.isLoading)
 
-                Button("Register") {
+                Button("Бүртгүүлэх") {
                     Task {
                         await authVM.register(name: name, phone: phone, email: email, password: password, confirmPassword: confirmPassword)
                     }

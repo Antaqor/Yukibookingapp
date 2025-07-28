@@ -25,7 +25,7 @@ final class ArtistViewModel: ObservableObject {
             artists = loaded
         } catch {
             if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                self.error = "Unable to fetch artists. Check your internet connection."
+                self.error = "Артистуудыг авах боломжгүй байна. Интернэтээ шалгана уу."
             } else {
                 self.error = error.localizedDescription
             }
@@ -35,14 +35,14 @@ final class ArtistViewModel: ObservableObject {
     /// Promote an existing user to artist role using their email.
     func addArtist(email: String) async {
         guard !email.isEmpty else {
-            self.error = "Email is required"
+            self.error = "Имэйл оруулах шаардлагатай"
             return
         }
         error = nil
         do {
             let usersSnap = try await db.child("users").getData()
             guard let users = usersSnap.children.allObjects as? [DataSnapshot] else {
-                self.error = "User not found"
+                self.error = "Хэрэглэгч олдсонгүй"
                 return
             }
             for userSnap in users {
@@ -60,10 +60,10 @@ final class ArtistViewModel: ObservableObject {
                     return
                 }
             }
-            self.error = "User not found"
+            self.error = "Хэрэглэгч олдсонгүй"
         } catch {
             if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                self.error = "Unable to add artist. Check your internet connection."
+                self.error = "Артист нэмэх боломжгүй байна. Интернэтээ шалгана уу."
             } else {
                 self.error = error.localizedDescription
             }
@@ -79,7 +79,7 @@ final class ArtistViewModel: ObservableObject {
             await fetchArtists()
         } catch {
             if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                self.error = "Unable to remove artist. Check your internet connection."
+                self.error = "Артист устгах боломжгүй байна. Интернэтээ шалгана уу."
             } else {
                 self.error = error.localizedDescription
             }
@@ -94,7 +94,7 @@ final class ArtistViewModel: ObservableObject {
             await fetchArtists()
         } catch {
             if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                self.error = "Unable to assign artist. Check your internet connection."
+                self.error = "Артистыг оноох боломжгүй байна. Интернэтээ шалгана уу."
             } else {
                 self.error = error.localizedDescription
             }

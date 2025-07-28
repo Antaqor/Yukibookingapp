@@ -9,7 +9,7 @@ struct AdminTabView: View {
             }
             .tabItem {
                 Image(systemName: "house")
-                Text("Home")
+                Text("Нүүр")
             }
 
             NavigationView {
@@ -17,7 +17,7 @@ struct AdminTabView: View {
             }
             .tabItem {
                 Image(systemName: "person.3")
-                Text("Artists")
+                Text("Артистууд")
             }
 
             NavigationView {
@@ -25,7 +25,7 @@ struct AdminTabView: View {
             }
             .tabItem {
                 Image(systemName: "creditcard")
-                Text("Finance")
+                Text("Санхүү")
             }
         }
     }

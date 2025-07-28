@@ -54,7 +54,7 @@ struct ProfileView: View {
 
                 // When the user is an artist show only their assigned location
                 if let locationName = currentLocationName {
-                    Section(header: Text("My Location")) {
+                    Section(header: Text("Миний байршил")) {
                         Text(locationName)
                     }
                 } else {
@@ -62,11 +62,11 @@ struct ProfileView: View {
                     Section(header: Text("Миний цагууд")) {
                         ForEach(bookingVM.bookings) { booking in
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Artist: \(artistName(for: booking.artistId))")
-                                Text("Date: \(booking.date)")
-                                Text("Time: \(booking.time)")
-                                Text("Booked: \(formattedDate(booking.createdAt))")
-                                Text("Status: \(booking.status)")
+                                Text("Артист: \(artistName(for: booking.artistId))")
+                                Text("Огноо: \(booking.date)")
+                                Text("Цаг: \(booking.time)")
+                                Text("Захиалсан: \(formattedDate(booking.createdAt))")
+                                Text("Төлөв: \(booking.status)")
                                     .fontWeight(.semibold)
                                     .foregroundColor(.primary)
                             }
@@ -81,7 +81,7 @@ struct ProfileView: View {
                 }
 
                 Section {
-                    Button("Sign Out") { authVM.signOut() }
+                    Button("Гарах") { authVM.signOut() }
                 }
             }
             .listStyle(.insetGrouped)
@@ -91,7 +91,7 @@ struct ProfileView: View {
                     .foregroundColor(.red)
             }
         }
-        .navigationTitle("Profile")
+        .navigationTitle("Профайл")
         .task {
             await artistVM.fetchArtists()
             if authVM.role != "artist" {

@@ -23,21 +23,21 @@ struct RegisterView: View {
 
             ScrollView {
                 VStack(spacing: 24) {
-                    Text("Yuki Salon")
+                    Text("Юки салон")
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(.brand)
                         .padding(.top, 28)
 
-                    SurfaceCard(title: "Create Account") {
+                    SurfaceCard(title: "Бүртгэл үүсгэх") {
                         VStack(spacing: 14) {
 
-                            textField("Full Name",
+                            textField("Бүтэн нэр",
                                       text: $name,
                                       field: .name,
                                       contentType: .name)
                                 .submitLabel(.next)
 
-                            textField("Phone Number",
+                            textField("Утасны дугаар",
                                       text: $phone,
                                       field: .phone,
                                       contentType: .telephoneNumber,
@@ -45,7 +45,7 @@ struct RegisterView: View {
                                       transform: { String($0.filter(\.isNumber)) }) // ✅ буцаадаг
                                 .submitLabel(.next)
 
-                            textField("Email",
+                            textField("Имэйл",
                                       text: $email,
                                       field: .email,
                                       contentType: .emailAddress,
@@ -55,12 +55,12 @@ struct RegisterView: View {
                                 .autocorrectionDisabled(true)
                                 .submitLabel(.next)
 
-                            secureField("Password (min 6 chars)",
+                            secureField("Нууц үг (хамгийн бага 6 тэмдэгт)",
                                         text: $password,
                                         field: .password)
                                 .submitLabel(.next)
 
-                            secureField("Confirm Password",
+                            secureField("Нууц үг давтах",
                                         text: $confirmPassword,
                                         field: .confirm)
                                 .submitLabel(.go)
@@ -73,7 +73,7 @@ struct RegisterView: View {
                             }
 
                             Button(action: register) {
-                                Text("Register")
+                                Text("Бүртгүүлэх")
                                     .font(.system(size: 16, weight: .semibold))
                             }
                             .buttonStyle(PrimaryButtonStyle())
@@ -84,13 +84,13 @@ struct RegisterView: View {
                     if authVM.isLoading { ProgressView() }
 
                     HStack(spacing: 6) {
-                        Text("Already have an account?")
+                        Text("Өмнө нь бүртгүүлсэн үү?")
                             .foregroundColor(.secondary)
                         Button {
                             Haptics.tap()
                             dismiss()
                         } label: {
-                            Text("Log In").fontWeight(.semibold)
+                            Text("Нэвтрэх").fontWeight(.semibold)
                         }
                         .foregroundColor(.brand)
                     }
