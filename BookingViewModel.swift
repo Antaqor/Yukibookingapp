@@ -5,6 +5,7 @@ import FirebaseDatabase
 final class BookingViewModel: ObservableObject {
     @Published var bookings: [Booking] = []
     @Published var error: String?
+    @Published var userPhones: [String: String] = [:]
 
     private let db = Database.database().reference()
 
@@ -93,6 +94,21 @@ final class BookingViewModel: ObservableObject {
 
             self.bookings = loaded.sorted { $0.createdAt > $1.createdAt }
 
+            // Load user phone numbers for displayed bookings
+            var phones: [String: String] = [:]
+            let ids = Set(self.bookings.map { $0.userId })
+            for id in ids {
+                do {
+                    let snap = try await getDataWithRetry(
+                        db.child("users").child(id).child("phone")
+                    )
+                    if let phone = snap.value as? String { phones[id] = phone }
+                } catch {
+                    // ignore individual failures
+                }
+            }
+            self.userPhones = phones
+
             #if DEBUG
             print("✅ loaded bookings count:", self.bookings.count)
             #endif
@@ -122,6 +138,21 @@ final class BookingViewModel: ObservableObject {
         } catch {
             if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
                 self.error = "Захиалгыг шинэчилж чадсангүй. Интернэтээ шалгана уу."
+            } else {
+                self.error = error.localizedDescription
+            }
+        }
+    }
+
+    /// Permanently remove a booking
+    func deleteBooking(_ booking: Booking) async {
+        let ref = db.child("bookings").child(booking.id)
+        do {
+            try await ref.removeValue()
+            bookings.removeAll { $0.id == booking.id }
+        } catch {
+            if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
+                self.error = "Захиалгыг устгаж чадсангүй. Интернэтээ шалгана уу."
             } else {
                 self.error = error.localizedDescription
             }
