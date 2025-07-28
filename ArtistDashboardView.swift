@@ -44,6 +44,9 @@ struct ArtistDashboardView: View {
                     ForEach(bookingVM.bookings) { booking in
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Хэрэглэгч: \(booking.userId)")
+                            if let phone = bookingVM.userPhones[booking.userId] {
+                                Text("Утас: \(phone)")
+                            }
                             Text("Огноо: \(booking.date)")
                             Text("Цаг: \(booking.time)")
                             Text("Захиалсан: \(formattedDate(booking.createdAt))")
@@ -64,6 +67,14 @@ struct ArtistDashboardView: View {
                                 }
                                 .tint(.red)
                                 .disabled(booking.status == "canceled")
+
+                                Button(role: .destructive) {
+                                    Task {
+                                        await bookingVM.deleteBooking(booking)
+                                    }
+                                } label: {
+                                    Image(systemName: "trash")
+                                }
                             }
                         }
                         .padding(.vertical, 8)
