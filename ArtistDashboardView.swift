@@ -43,20 +43,20 @@ struct ArtistDashboardView: View {
                 } else {
                     ForEach(bookingVM.bookings) { booking in
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("User: \(booking.userId)")
-                            Text("Date: \(booking.date)")
-                            Text("Time: \(booking.time)")
-                            Text("Booked: \(formattedDate(booking.createdAt))")
-                            Text("Status: \(booking.status)").fontWeight(.semibold)
+                            Text("Хэрэглэгч: \(booking.userId)")
+                            Text("Огноо: \(booking.date)")
+                            Text("Цаг: \(booking.time)")
+                            Text("Захиалсан: \(formattedDate(booking.createdAt))")
+                            Text("Төлөв: \(booking.status)").fontWeight(.semibold)
                             HStack {
-                                Button("Accept") {
+                                Button("Зөвшөөрөх") {
                                     Task {
                                         await bookingVM.updateBooking(booking, to: "accepted")
                                         await loadBookings()
                                     }
                                 }.disabled(booking.status == "accepted")
 
-                                Button("Cancel") {
+                                Button("Цуцлах") {
                                     Task {
                                         await bookingVM.updateBooking(booking, to: "canceled")
                                         await loadBookings()
@@ -72,8 +72,8 @@ struct ArtistDashboardView: View {
                     }
                 }
             }
-            .navigationTitle("My Bookings")
-            .toolbar { Button("Sign Out") { authVM.signOut() } }
+            .navigationTitle("Миний захиалгууд")
+            .toolbar { Button("Гарах") { authVM.signOut() } }
             .task {
                 await artistVM.fetchArtists()
                 await loadBookings()

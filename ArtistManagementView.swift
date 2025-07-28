@@ -14,13 +14,13 @@ struct ArtistManagementView: View {
         // view is managed correctly and avoids Auto Layout warnings
         // when the text field becomes first responder on iPad/Mac.
         Form {
-            Section(header: Text("Artists")) {
+            Section(header: Text("Артистууд")) {
                 ForEach(viewModel.artists) { artist in
                     HStack {
                             VStack(alignment: .leading) {
                                 Text(artist.name)
                                 if let location = artist.locationId {
-                                    Text("Location: \(locationName(for: location))")
+                                    Text("Байршил: \(locationName(for: location))")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -44,12 +44,12 @@ struct ArtistManagementView: View {
                     }
                 }
 
-                Section(header: Text("Add Artist")) {
-                    TextField("User email", text: $email)
+                Section(header: Text("Артист нэмэх")) {
+                    TextField("Хэрэглэгчийн имэйл", text: $email)
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
                         .textContentType(.emailAddress)
-                    Button("Add") {
+                    Button("Нэмэх") {
                         Task {
                             await viewModel.addArtist(email: email)
                             email = ""
@@ -63,7 +63,7 @@ struct ArtistManagementView: View {
                 }
             }
         }
-        .navigationTitle("Artists")
+        .navigationTitle("Артистууд")
         .task { await viewModel.fetchArtists() }
     }
 }

@@ -98,7 +98,7 @@ final class BookingViewModel: ObservableObject {
             #endif
         } catch {
             if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                self.error = "Unable to fetch bookings. Check your internet connection."
+                self.error = "Захиалгуудыг авах боломжгүй байна. Интернэтээ шалгана уу."
             } else {
                 self.error = error.localizedDescription
             }
@@ -110,7 +110,7 @@ final class BookingViewModel: ObservableObject {
 
     func updateBooking(_ booking: Booking, to status: String) async {
         guard !status.isEmpty else {
-            error = "Invalid status"
+            error = "Буруу төлөв"
             return
         }
         let ref = db.child("bookings").child(booking.id).child("status")
@@ -121,7 +121,7 @@ final class BookingViewModel: ObservableObject {
             }
         } catch {
             if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                self.error = "Unable to update booking. Check your internet connection."
+                self.error = "Захиалгыг шинэчилж чадсангүй. Интернэтээ шалгана уу."
             } else {
                 self.error = error.localizedDescription
             }

@@ -39,7 +39,7 @@ final class TimeSelectionViewModel: ObservableObject {
             reservedSlots = Set(hours)
         } catch {
             if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                self.error = "Unable to fetch slots. Check your internet connection."
+                self.error = "Цагийн мэдээллийг авах боломжгүй байна. Интернэтээ шалгана уу."
             } else {
                 self.error = error.localizedDescription
             }
@@ -77,7 +77,7 @@ final class TimeSelectionViewModel: ObservableObject {
             weeklyReserved = schedule
         } catch {
             if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                self.error = "Unable to fetch slots. Check your internet connection."
+                self.error = "Цагийн мэдээллийг авах боломжгүй байна. Интернэтээ шалгана уу."
             } else {
                 self.error = error.localizedDescription
             }
@@ -87,7 +87,7 @@ final class TimeSelectionViewModel: ObservableObject {
     /// Create a new booking
     func createBooking(for artistId: String, date: String, slot: Int) async {
         guard let uid = Auth.auth().currentUser?.uid else {
-            error = "User not logged in"
+            error = "Хэрэглэгч нэвтрээгүй"
             return
         }
         isCreating = true
@@ -108,7 +108,7 @@ final class TimeSelectionViewModel: ObservableObject {
             await fetchSchedule(for: artistId, days: daysWindow)
         } catch {
             if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                self.error = "Unable to create booking. Check your internet connection."
+                self.error = "Захиалгыг үүсгэж чадсангүй. Интернэтээ шалгана уу."
             } else {
                 self.error = error.localizedDescription
             }

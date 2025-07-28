@@ -20,21 +20,21 @@ final class AuthViewModel: ObservableObject {
         if let code = AuthErrorCode(rawValue: (error as NSError).code) {
             switch code {
             case .invalidEmail:
-                self.error = "Invalid email address"
+                self.error = "Имэйл хаяг буруу"
             case .emailAlreadyInUse:
-                self.error = "Email already in use"
+                self.error = "Имэйл аль хэдийн ашиглагдсан"
             case .weakPassword:
-                self.error = "Password is too weak"
+                self.error = "Нууц үг хэт сул байна"
             case .wrongPassword, .userNotFound:
-                self.error = "Incorrect email or password"
+                self.error = "Имэйл эсвэл нууц үг буруу"
             case .userDisabled:
-                self.error = "This account has been disabled"
+                self.error = "Энэ аккаунт идэвхгүй болсон"
             case .invalidCredential, .invalidUserToken, .userTokenExpired:
-                self.error = "The supplied credentials have expired. Please log in again"
+                self.error = "Нэвтрэх мэдээллийн хугацаа дууссан. Дахин нэвтэрнэ үү"
             case .networkError:
-                self.error = "Network error. Please check your connection"
+                self.error = "Сүлжээний алдаа. Холболтоо шалгана уу"
             case .tooManyRequests:
-                self.error = "Too many attempts. Please try again later"
+                self.error = "Хэт олон оролдлого. Дараа дахин оролдоно уу"
             default:
                 self.error = error.localizedDescription
             }
@@ -57,7 +57,7 @@ final class AuthViewModel: ObservableObject {
     /// Performs user login with basic validation
     func login(email: String, password: String) async {
         guard !email.isEmpty, !password.isEmpty else {
-            self.error = "Email and password are required"
+            self.error = "Имэйл болон нууц үг шаардлагатай"
             return
         }
         isLoading = true
@@ -75,15 +75,15 @@ final class AuthViewModel: ObservableObject {
     /// Registers a new user in Firebase with validation
     func register(name: String, phone: String, email: String, password: String, confirmPassword: String) async {
         guard !name.isEmpty, !email.isEmpty, !password.isEmpty else {
-            self.error = "All fields are required"
+            self.error = "Бүх талбар заавал бөглөнө"
             return
         }
         guard password == confirmPassword else {
-            self.error = "Passwords do not match"
+            self.error = "Нууц үг таарахгүй байна"
             return
         }
         guard password.count >= 6 else {
-            self.error = "Password must be at least 6 characters"
+            self.error = "Нууц үг дор хаяж 6 тэмдэгт байх ёстой"
             return
         }
         isLoading = true
@@ -102,7 +102,7 @@ final class AuthViewModel: ObservableObject {
 
     func resetPassword(email: String) async {
         guard !email.isEmpty else {
-            self.error = "Please enter your email"
+            self.error = "Имэйл хаягаа оруулна уу"
             return
         }
         isLoading = true
