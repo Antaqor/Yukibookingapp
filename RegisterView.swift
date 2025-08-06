@@ -4,6 +4,7 @@ import UIKit
 struct RegisterView: View {
     @EnvironmentObject private var authVM: AuthViewModel
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
 
     @State private var name = ""
     @State private var phone = ""
@@ -88,6 +89,7 @@ struct RegisterView: View {
                             .foregroundColor(.secondary)
                         Button {
                             Haptics.tap()
+                            hasLaunchedBefore = true
                             dismiss()
                         } label: {
                             Text("Нэвтрэх").fontWeight(.semibold)
