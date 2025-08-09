@@ -36,6 +36,11 @@ struct YukiApp: App {
             }
             .tint(Color("AccentColor"))
             .environmentObject(authVM)
+            .onAppear {
+                if ProcessInfo.processInfo.arguments.contains("--uitesting-ipad") {
+                    UIDevice.current.setValue(UIUserInterfaceIdiom.pad.rawValue, forKey: "userInterfaceIdiom")
+                }
+            }
         }
     }
 }
