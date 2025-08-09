@@ -127,6 +127,7 @@ struct LoginView: View {
             return
         }
         Haptics.tap()
+        print("Login tapped")
         Task { await authVM.login(email: trimmedEmail, password: trimmedPassword) }
     }
 }

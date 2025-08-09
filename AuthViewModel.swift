@@ -61,15 +61,19 @@ final class AuthViewModel: ObservableObject {
             return
         }
         isLoading = true
+        print("Login started for \(email)")
         error = nil
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             self.user = result.user
             await fetchUserRole()
+            print("Login succeeded for user: \(result.user.uid)")
         } catch {
             handleAuthError(error)
+            print("Login failed: \(error.localizedDescription)")
         }
         isLoading = false
+        print("Login finished")
     }
 
     /// Registers a new user in Firebase with validation
