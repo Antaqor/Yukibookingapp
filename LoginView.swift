@@ -11,13 +11,6 @@ struct LoginView: View {
     @FocusState private var focus: Field?
 
     private enum Field { case email, password }
-    /// Enables the login button only when the user has entered what looks
-    /// like a valid email and a sufficiently long password. Trimming helps
-    /// avoid accidental spaces that would otherwise break authentication.
-    private var isLoginEnabled: Bool {
-        email.trimmingCharacters(in: .whitespacesAndNewlines).contains("@") &&
-        password.trimmingCharacters(in: .whitespacesAndNewlines).count >= 6
-    }
     private func ascii(_ s: String) -> String { String(s.filter { $0.isASCII }) }
 
     var body: some View {
@@ -70,7 +63,7 @@ struct LoginView: View {
                                 )
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .submitLabel(.go)
-                                .onSubmit { if isLoginEnabled { login() } }
+                                .onSubmit { login() }
 
                             if let error = authVM.error, !error.isEmpty {
                                 Text(error)
@@ -82,7 +75,6 @@ struct LoginView: View {
                                 Text("Нэвтрэх").font(.system(size: 16, weight: .semibold))
                             }
                             .buttonStyle(PrimaryButtonStyle())
-                            .disabled(!isLoginEnabled || authVM.isLoading)
 
                             Button("Нууц үгээ мартсан уу?") {
                                 Task {
@@ -124,13 +116,16 @@ struct LoginView: View {
         .onAppear { focus = .email }
     }
 
-    /// Attempts to authenticate the user with the current credentials.
-    /// Leading and trailing spaces are removed before sending to the view model
-    /// to prevent login failures from accidental whitespace.
+    /// Attempts to authenticate the user with the current credentials after
+    /// performing basic validation on the input fields.
     private func login() {
         authVM.error = nil
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedEmail.contains("@"), trimmedPassword.count >= 6 else {
+            authVM.error = "Имэйл буруу эсвэл нууц үг 6-аас дээш тэмдэгт байх ёстой"
+            return
+        }
         Haptics.tap()
         Task { await authVM.login(email: trimmedEmail, password: trimmedPassword) }
     }
