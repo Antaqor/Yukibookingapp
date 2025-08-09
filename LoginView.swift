@@ -132,6 +132,7 @@ struct LoginView: View {
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
         Haptics.tap()
+        print("Login tapped")
         Task { await authVM.login(email: trimmedEmail, password: trimmedPassword) }
     }
 }
